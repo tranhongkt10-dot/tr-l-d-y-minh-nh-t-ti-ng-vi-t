@@ -605,27 +605,30 @@
   }
 
   function speak(text, rate = 0.85) {
-    if (!("speechSynthesis" in window)) {
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
       setStatus("micStatus",
-        "Thiết bị hoặc trình duyệt không hỗ trợ đọc văn bản thành tiếng.",
+        "Thiết bị hoặc trình duyệt không hỗ trợ đọc văn bản thành tiếng. Bé vẫn có thể xem nhận xét bằng chữ.",
         "error");
       return false;
     }
 
-    const content = (text || "").trim();
+    const content = String(text || "").trim();
     if (!content) return false;
 
     try {
       const synth = window.speechSynthesis;
+      // Dừng câu trước để không chồng tiếng khi bé đọc lại nhiều lần.
       synth.cancel();
 
       const utterance = new SpeechSynthesisUtterance(content);
       utterance.lang = "vi-VN";
-      utterance.rate = rate;
+      utterance.rate = Math.max(0.65, Math.min(1.15, Number(rate) || 0.85));
       utterance.pitch = 1;
       utterance.volume = 1;
 
-      const voice = selectedVoice();
+      // Ưu tiên giọng cô/thầy tiếng Việt do người dùng chọn; nếu chưa chọn,
+      // tự tìm giọng tiếng Việt đã cài trên thiết bị.
+      const voice = selectedVoice() || voices.find(v => /^vi([_-]|$)/i.test(v.lang || ""));
       if (voice) {
         utterance.voice = voice;
         utterance.lang = voice.lang || "vi-VN";
@@ -633,17 +636,29 @@
 
       utterance.onerror = event => {
         console.warn("Lỗi đọc văn bản:", event.error);
-        if (text === lastFeedback) {
+        if (content === lastFeedback) {
           setStatus("micStatus",
-            "Nhận xét đã hiện bằng chữ. Nếu chưa nghe tiếng, hãy nhấn nút “Nghe lời nhận xét và động viên”.",
+            "Nhận xét đã hiện bằng chữ nhưng thiết bị không phát được giọng nói. Hãy kiểm tra âm lượng, giọng tiếng Việt và nhấn nút nghe nhận xét.",
             "error");
         }
       };
 
-      synth.speak(utterance);
+      // Một số trình duyệt cần chờ rất ngắn sau cancel() trước khi speak().
+      window.setTimeout(() => {
+        try {
+          synth.speak(utterance);
+        } catch (error) {
+          console.error("Không phát được lời đọc:", error);
+          if (content === lastFeedback) {
+            setStatus("micStatus",
+              "Nhận xét đã hiện bằng chữ nhưng chưa phát được âm thanh. Hãy nhấn nút nghe nhận xét.",
+              "error");
+          }
+        }
+      }, 80);
       return true;
     } catch (error) {
-      console.error(error);
+      console.error("Lỗi khởi tạo giọng đọc:", error);
       return false;
     }
   }
@@ -796,14 +811,12 @@
     // Chỉ gọi một lần tại bước kết thúc lượt nhận dạng.
     // Trên một số điện thoại, trình duyệt có thể chặn tự phát tiếng.
     window.setTimeout(() => {
-      if (lastFeedback === feedback.text) {
-        const success = speak(feedback.text, 0.9);
-
-        if (!success) {
-          setStatus("micStatus",
-            "Nhận xét đã hiện bằng chữ. Hãy nhấn nút nghe nhận xét để phát giọng nói.",
-            "error");
-        }
+      if (lastFeedback !== feedback.text) return;
+      const success = speak(feedback.text, 0.9);
+      if (!success) {
+        setStatus("micStatus",
+          "Nhận xét đã hiện bằng chữ. Hãy nhấn nút nghe nhận xét để phát giọng nói.",
+          "error");
       }
     }, 300);
   }
@@ -913,77 +926,20 @@
         listening = false;
         $("micBtn").textContent = "🎙️ Bé đọc vào micro";
 
-        // Chốt kết quả một lần duy nhất sau khi nhận dạng kết thúc.
-        if (!finalHandled) {
-          finalHandled = true;
-          const spoken = finalText.trim();
+        // Chỉ xử lý một lần khi lượt nhận dạng thực sự kết thúc.
+        if (finalHandled) return;
+        finalHandled = true;
 
-          if (spoken) {
-            evaluateSpeech(spoken);
-          } else {
-            const currentStatus = $("micStatus").textContent;
+        const spoken = String(finalText || "").trim();
+        if (spoken) {
+          evaluateSpeech(spoken);
+          return;
+        }
 
-            $("transcriptArea").classList.remove("hidden");
-            $("transcript").textContent =
-              "Chưa có nội dung lời đọc được nhận dạng.";
-
-            $("resultBox").classList.remove("hidden");
-            $("resultTitle").textContent = "🌷 Mình thử lại nhé!";
-            $("stars").textContent = "⭐";
-            $("feedbackText").textContent =
-              "Cô chưa nghe rõ lời con đọc. Con hãy kiểm tra micro, nói to và chậm hơn nhé. Cô luôn tin con!";
-            $("scoreBar").style.width = "0%";
-            $("scoreLabel").textContent =
-              "Chưa đủ dữ liệu để tính mức độ khớp văn bản.";
-            $("wordComparison").replaceChildren();
-
-            lastFeedback =
-              "Cô chưa nghe rõ lời con đọc. Con hãy kiểm tra micro, nói to và chậm hơn nhé. Cô luôn tin con!";
-            lastSpokenText = "";
-
-            // Tránh ghi đè thông báo lỗi chi tiết do trình duyệt trả về.
-            if (!currentStatus.includes("Micro") &&
-                !currentStatus.includes("mạng") &&
-                !currentStatus.includes("hỗ trợ") &&
-                !currentStatus.includes("quyền")) {
-              setStatus("micStatus",
-                "Không nhận được lời đọc. Nhận xét động viên đã hiển thị; con hãy thử lại nhé.",
-                "error");
-            }
-
-         window.setTimeout(() => {
-  const feedback = String(lastFeedback || "").trim();
-
-  if (!feedback) return;
-
-  if (!("speechSynthesis" in window)) {
-    console.warn("Trình duyệt không hỗ trợ đọc nhận xét bằng giọng nói.");
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(feedback);
-  utterance.lang = "vi-VN";
-  utterance.rate = 0.9;
-  utterance.pitch = 1.0;
-  utterance.volume = 1.0;
-
-  const voices = window.speechSynthesis.getVoices();
-  const vietnameseVoice = voices.find(
-    voice => voice.lang.toLowerCase().startsWith("vi")
-  );
-
-  if (vietnameseVoice) {
-    utterance.voice = vietnameseVoice;
-  }
-
-  utterance.onerror = (event) => {
-    console.error("Lỗi phát lời nhận xét:", event.error);
-  };
-
-  window.speechSynthesis.speak(utterance);
-}, 500);
+        // Dùng chung một luồng nhận xét để luôn hiện nhận xét bằng chữ và
+        // thử đọc nhận xét bằng tiếng Việt; tránh tạo thêm bộ phát âm thanh thứ hai.
+        evaluateSpeech("");
+      };
 
       recognition.start();
     } catch (error) {
