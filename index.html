@@ -951,12 +951,39 @@
                 "error");
             }
 
-            window.setTimeout(() => {
-              if (lastFeedback) speak(lastFeedback, 0.9);
-            }, 300);
-          }
-        }
-      };
+         window.setTimeout(() => {
+  const feedback = String(lastFeedback || "").trim();
+
+  if (!feedback) return;
+
+  if (!("speechSynthesis" in window)) {
+    console.warn("Trình duyệt không hỗ trợ đọc nhận xét bằng giọng nói.");
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  const utterance = new SpeechSynthesisUtterance(feedback);
+  utterance.lang = "vi-VN";
+  utterance.rate = 0.9;
+  utterance.pitch = 1.0;
+  utterance.volume = 1.0;
+
+  const voices = window.speechSynthesis.getVoices();
+  const vietnameseVoice = voices.find(
+    voice => voice.lang.toLowerCase().startsWith("vi")
+  );
+
+  if (vietnameseVoice) {
+    utterance.voice = vietnameseVoice;
+  }
+
+  utterance.onerror = (event) => {
+    console.error("Lỗi phát lời nhận xét:", event.error);
+  };
+
+  window.speechSynthesis.speak(utterance);
+}, 500);
 
       recognition.start();
     } catch (error) {
