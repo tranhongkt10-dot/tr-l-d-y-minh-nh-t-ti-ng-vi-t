@@ -316,39 +316,110 @@ comparison
 };
 }
 
+
 function evaluateSpeech(spoken) {
-const target = lessons[currentIndex];
-const result = compareWords(target, spoken);
-const score = result.score;
-let feedback;
-if (!spoken.trim()) {
-feedback = "Cô chưa nghe rõ con đọc. Con hãy thử lại ở nơi yên tĩnh, nói từng tiếng rõ ràng nhé!";
-} else if (score >= 90) {
-feedback = "Con đọc rất tốt! Hãy tiếp tục phát huy và luyện đọc mỗi ngày nhé!";
-} else if (score >= 65) {
-feedback = "Con đã cố gắng rất tốt! Hãy đọc lại những tiếng còn thiếu để câu đọc rõ ràng hơn nhé!";
-} else {
-feedback = "Không sao đâu con! Mỗi lần luyện đọc là một lần tiến bộ. Con hãy nghe mẫu và thử lại nhé!";
-}
-lastFeedback = feedback;
-$("transcript").textContent = spoken || "Chưa nhận dạng được lời đọc.";
-$("transcriptArea").classList.remove("hidden");
-$("resultBox").classList.remove("hidden");
-$("stars").textContent = score >= 90 ? "⭐⭐⭐⭐⭐" : score >= 65 ? "⭐⭐⭐" : "⭐⭐";
-$("feedbackText").textContent = feedback;
-$("scoreBar").style.width = score + "%";
-$("scoreLabel").textContent = spoken.trim()
-? "Mức độ khớp văn bản: " + score + "% (không phải điểm đánh giá phát âm)."
-: "Chưa có kết quả để đối chiếu văn bản.";
-$("wordComparison").innerHTML = "";
-result.comparison.forEach(item => {
-const span = document.createElement("span");
-span.className = "word" + (item.ok ? "" : " missed");
-span.textContent = (item.ok ? "✓ " : "• ") + item.word;
-$("wordComparison").appendChild(span);
-});
-if (!spoken.trim()) $("wordComparison").textContent = "Chưa có từ để đối chiếu.";
-setStatus("micStatus", spoken.trim() ? "Đã hoàn tất lượt đọc. Con hãy xem nhận xét bên dưới nhé!" : "Chưa nhận dạng được câu đọc. Con hãy thử lại nhé!", spoken.trim() ? "success" : "error");
+  const target = lessons[currentIndex];
+  const result = compareWords(target, spoken);
+  const score = result.score;
+
+  let feedback;
+  let spokenFeedback;
+
+  if (!spoken.trim()) {
+    feedback = "Cô chưa nghe rõ con đọc. Con hãy thử lại ở nơi yên tĩnh, nói từng tiếng rõ ràng nhé!";
+    spokenFeedback = "Cô chưa nghe rõ con đọc. Không sao đâu con! Hãy thử lại, đọc chậm và rõ từng tiếng nhé. Cô tin con làm được!";
+  } else if (score >= 90) {
+    feedback = "Con đọc rất tốt! Hãy tiếp tục phát huy và luyện đọc mỗi ngày nhé!";
+    spokenFeedback = "Chúc mừng con! Con đọc rất tốt. Cô khen con đã cố gắng đọc rõ ràng. Hãy tiếp tục luyện đọc mỗi ngày để ngày càng tiến bộ nhé!";
+  } else if (score >= 65) {
+    feedback = "Con đã cố gắng rất tốt! Hãy đọc lại những tiếng còn thiếu để câu đọc rõ ràng hơn nhé!";
+    spokenFeedback = "Con đã cố gắng rất tốt! Một số tiếng con đọc còn thiếu hoặc chưa khớp với câu mẫu. Con hãy nghe mẫu thêm một lần và đọc chậm hơn nhé. Cô tin con sẽ làm tốt hơn!";
+  } else {
+    feedback = "Không sao đâu con! Mỗi lần luyện đọc là một lần tiến bộ. Con hãy nghe mẫu và thử lại nhé!";
+    spokenFeedback = "Không sao đâu con! Mình cùng cố gắng nhé. Con hãy nhấn nghe mẫu, lắng nghe thật kỹ rồi đọc từng tiếng chậm rãi. Mỗi ngày luyện tập một chút, con sẽ tiến bộ hơn!";
+  }
+
+  lastFeedback = spokenFeedback;
+
+  $("transcript").textContent =
+    spoken || "Chưa nhận dạng được lời đọc.";
+  $("transcriptArea").classList.remove("hidden");
+  $("resultBox").classList.remove("hidden");
+
+  $("stars").textContent =
+    score >= 90 ? "⭐⭐⭐⭐⭐" :
+    score >= 65 ? "⭐⭐⭐" : "⭐⭐";
+
+  $("feedbackText").textContent = feedback;
+  $("scoreBar").style.width = score + "%";
+
+  $("scoreLabel").textContent = spoken.trim()
+    ? "Mức độ khớp văn bản: " + score +
+      "% (không phải điểm đánh giá phát âm)."
+    : "Chưa có kết quả để đối chiếu văn bản.";
+
+  $("wordComparison").innerHTML = "";
+
+  result.comparison.forEach(item => {
+    const span = document.createElement("span");
+    span.className = "word" + (item.ok ? "" : " missed");
+    span.textContent = (item.ok ? "✓ " : "• ") + item.word;
+    $("wordComparison").appendChild(span);
+  });
+
+  if (!spoken.trim()) {
+    $("wordComparison").textContent =
+      "Chưa có từ để đối chiếu.";
+  }
+
+  setStatus(
+    "micStatus",
+    spoken.trim()
+      ? "Đã hoàn tất lượt đọc. Cô đang đọc lời nhận xét cho bé nghe."
+      : "Chưa nhận dạng được câu đọc. Cô đang hướng dẫn bé thử lại.",
+    spoken.trim() ? "success" : "error"
+  );
+
+  // TỰ ĐỘNG ĐỌC LỜI NHẬN XÉT SAU KHI BÉ ĐỌC XONG
+  if ("speechSynthesis" in window &&
+      window.SpeechSynthesisUtterance) {
+    window.speechSynthesis.cancel();
+
+    const utterance =
+      new SpeechSynthesisUtterance(spokenFeedback);
+
+    utterance.lang = "vi-VN";
+    utterance.rate = 0.85;
+
+    const selectedVoice = $("voiceSelect").value;
+    const selected = voices.find(
+      voice => voice.voiceURI === selectedVoice
+    );
+
+    if (selected) {
+      utterance.voice = selected;
+    }
+
+    utterance.onend = () => {
+      setStatus(
+        "micStatus",
+        "Đã nhận xét xong. Bé có thể luyện đọc câu tiếp theo!",
+        "success"
+      );
+    };
+
+    utterance.onerror = () => {
+      setStatus(
+        "micStatus",
+        "Nhận xét đã hiển thị bằng chữ. Nếu không nghe được, hãy kiểm tra âm lượng và giọng đọc của thiết bị.",
+        "error"
+      );
+    };
+
+    window.setTimeout(() => {
+      window.speechSynthesis.speak(utterance);
+    }, 500);
+  }
 }
 
 function startRecognition() {
