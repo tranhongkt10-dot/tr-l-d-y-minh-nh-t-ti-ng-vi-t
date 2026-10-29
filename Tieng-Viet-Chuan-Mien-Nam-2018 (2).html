@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiếng Việt - Giọng Miền Nam - AI Nghe và Sửa</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui, -apple-system, sans-serif}
+body{margin:0;background:#FFF7ED;color:#1F2937}
+.header{background:white;padding:14px;text-align:center;position:sticky;top:0;box-shadow:0 2px 12px rgba(0,0,0,.06);z-index:10}
+.badge{background:#10B981;color:white;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:800}
+.tabs{display:flex;gap:8px;overflow:auto;padding:12px 16px}
+.tab{flex:0 0 auto;padding:12px 18px;border-radius:16px;border:2px solid #E5E7EB;background:white;font-weight:800;cursor:pointer}
+.tab.active{background:#2563EB;color:white;border-color:#2563EB}
+.main{max-width:760px;margin:0 auto;padding:16px}
+.card{background:white;border-radius:24px;padding:22px;box-shadow:0 8px 30px rgba(0,0,0,.06);text-align:center}
+.emoji{font-size:84px}
+.txt{font-size:54px;font-weight:900;line-height:1.15;margin:14px 0;word-break:break-word}
+.spell{color:#6B7280;font-size:19px}
+.box{background:#F0FDF4;border:2px solid #10B981;border-radius:16px;padding:14px;margin-top:14px;text-align:left}
+.box.warn{background:#FEF2F2;border-color:#EF4444}
+.box.listen{background:#EFF6FF;border-color:#3B82F6}
+.box.result{background:#FFFBEB;border-color:#F59E0B}
+select{width:100%;padding:12px;border-radius:10px;border:1px solid #D1D5DB}
+.speed{display:flex;gap:8px;margin-top:10px}
+.speed button{flex:1;padding:12px;border-radius:10px;border:1px solid #E5E7EB;background:white;cursor:pointer;font-weight:700;font-size:15px}
+.speed button.active{background:#111827;color:white}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.btn{padding:18px;border-radius:16px;border:none;font-weight:800;font-size:18px;cursor:pointer;transition:all .15s}
+.btn:active{transform:scale(.97)}
+.primary{background:#2563EB;color:white}
+.secondary{background:#F3F4F6}
+.mic{background:linear-gradient(135deg,#3B82F6,#2563EB);color:white;position:relative;overflow:hidden}
+.mic.listening{background:linear-gradient(135deg,#EF4444,#DC2626);animation:pulse 1.5s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}70%{box-shadow:0 0 0 20px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.success{background:#10B981;color:white;width:100%;margin-top:12px;font-size:21px}
+.nav{display:flex;justify-content:space-between;margin-top:14px}
+.footer{text-align:center;padding:18px;color:#9CA3AF;font-size:12px}
+.wave{display:flex;justify-content:center;align-items:center;gap:4px;height:40px;margin:10px 0}
+.wave span{width:6px;height:20px;background:#3B82F6;border-radius:4px;display:inline-block;animation:wave 1s infinite ease-in-out}
+.wave span:nth-child(2){animation-delay:.1s}
+.wave span:nth-child(3){animation-delay:.2s}
+.wave span:nth-child(4){animation-delay:.3s}
+@keyframes wave{0%,100%{height:12px}50%{height:36px}}
+.result-text{font-size:20px;font-weight:700;margin:8px 0}
+.correct{color:#059669}
+.wrong{color:#DC2626;background:#FEE2E2;padding:2px 6px;border-radius:6px}
+.suggestion{background:#DBEAFE;padding:12px;border-radius:12px;margin-top:10px;font-size:16px}
+.stars{font-size:32px;margin:8px 0}
+.progress{height:8px;background:#E5E7EB;border-radius:999px;overflow:hidden;margin-top:10px}
+.progress div{height:100%;background:#10B981;transition:width .5s}
+</style>
+</head>
+<body>
+<div class="header">
+<div style="font-weight:900;font-size:21px">🇻🇳 Tiếng Việt - Giọng Miền Nam - AI Sửa Lỗi</div>
+<div style="margin-top:6px"><span class="badge">EDGE ĐÃ CÓ TIẾNG VIỆT - BẢN NÂNG CAO CÓ NGHE</span></div>
+<div id="voiceStatus" style="margin-top:8px;font-size:13px;color:#059669;font-weight:800">Đang kiểm tra giọng đọc...</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div style="max-width:760px;margin:0 auto;padding:0 16px">
+<div class="box" style="background:#FFF7ED;border-color:#F59E0B">
+<div style="font-weight:900;font-size:16px">✏️ Tự nhập từ/câu bé muốn học (mới):</div>
+<div style="display:flex;gap:8px;margin-top:10px">
+<input id="customInput" type="text" placeholder="Ví dụ: Con yêu mẹ lắm ạ" style="flex:1;padding:14px;border-radius:12px;border:2px solid #E5E7EB;font-size:18px;font-weight:700">
+<button class="btn primary" style="padding:14px 20px;flex:0 0 auto" onclick="addCustom()">➕ Thêm</button>
+</div>
+<div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+<button class="btn secondary" style="padding:8px 12px;font-size:14px" onclick="quickAdd('Con cảm ơn mẹ ạ')">Cảm ơn mẹ</button>
+<button class="btn secondary" style="padding:8px 12px;font-size:14px" onclick="quickAdd('Con xin lỗi mẹ ạ')">Xin lỗi mẹ</button>
+<button class="btn secondary" style="padding:8px 12px;font-size:14px" onclick="quickAdd('Con đói bụng quá')">Đói bụng</button>
+<button class="btn secondary" style="padding:8px 12px;font-size:14px" onclick="quickAdd('Con muốn đi chơi')">Muốn đi chơi</button>
+</div>
+<div style="font-size:12px;color:#6B7280;margin-top:6px">Gõ bất kỳ câu tiếng Việt nào, bấm Thêm là bé học ngay, có đánh vần và giọng đọc chuẩn</div>
+</div>
+</div>
+<div class="main">
+<div class="card">
+<div class="emoji" id="emoji">👋</div>
+<div class="txt" id="txt">Bé chào bà ạ.</div>
+<div class="spell" id="spell">Đánh vần: Bé - chào - bà - ạ</div>
+
+<div class="btns">
+<button class="btn primary" onclick="speakMain()">🔊 NGHE MẪU<br><small>Giọng Nam Miền Nam</small></button>
+<button class="btn secondary" onclick="speakSlow()">🐢 ĐỌC CHẬM</button>
+</div>
+
+<!-- CHỨC NĂNG MỚI: MỞ LOA NGHE BÉ NÓI -->
+<div class="box listen" style="margin-top:16px">
+<div style="font-weight:900;font-size:17px;margin-bottom:8px">🎤 Chức năng mới: Mở loa nghe bé nói</div>
+<button id="micBtn" class="btn mic" style="width:100%;padding:22px;font-size:20px" onclick="toggleListen()">
+<span id="micIcon">🎙️</span> <span id="micText">Bấm để bé nói</span><br>
+<small id="micSub" style="font-weight:400">Cho phép dùng micro khi trình duyệt hỏi</small>
+</button>
+<div id="wave" class="wave" style="display:none"><span></span><span></span><span></span><span></span><span></span></div>
+<div id="hearing" style="display:none;font-weight:700;color:#2563EB;margin-top:8px">👂 Đang nghe bé nói... Nói to rõ nhé!</div>
+<div id="transcript" style="display:none;margin-top:12px">
+<div style="font-size:14px;color:#6B7280">Bé vừa nói:</div>
+<div id="saidText" class="result-text"></div>
+</div>
+</div>
+
+<!-- KẾT QUẢ NHẬN XÉT -->
+<div id="feedbackBox" class="box result" style="display:none">
+<div style="font-weight:900;font-size:17px">📝 Thầy An nhận xét:</div>
+<div id="stars" class="stars"></div>
+<div id="feedbackText" class="result-text"></div>
+<div id="suggestion" class="suggestion" style="display:none"></div>
+<div class="progress"><div id="progressBar" style="width:0%"></div></div>
+<button class="btn secondary" style="width:100%;margin-top:10px" onclick="speakMain()">🔁 Nghe lại mẫu chuẩn</button>
+</div>
+
+<div class="box" style="margin-top:14px">
+<label style="font-weight:800">🎙️ Giọng đọc (Edge đã có sẵn):</label>
+<select id="voiceSelect" onchange="updateVoice()"></select>
+<div class="speed">
+<button id="sSlow" class="active" onclick="setRate(0.7)">🐢 Chậm</button>
+<button id="sMid" onclick="setRate(0.85)">🚶 Vừa</button>
+<button id="sFast" onclick="setRate(1)">⚡ Bình thường</button>
+</div>
+</div>
+
+<div class="nav">
+<button class="btn secondary" style="width:48%" onclick="prev()">⬅️ Trước</button>
+<button class="btn secondary" style="width:48%" onclick="next()">Tiếp ➡️</button>
+</div>
+</div>
+</div>
+<div class="footer">AI nghe - Chấm điểm - Sửa lỗi - Chỉ tiếng Việt - Giọng Miền Nam - CT 2018</div>
+
+<script>
+const grades=[
+{id:0,name:"💬 Lời Hay",desc:"Cảm ơn, Xin lỗi, Chào",items:[
+{text:"Con chào ông bà ạ.",spell:"Chào hỏi - Lễ phép - Chắp tay chào",emoji:"🙏",keywords:["chào","ông","bà","ạ"],tinhHuong:"Khi gặp ông bà, thầy cô, người lớn",mau:"Con chào ông bà ạ!"},
+{text:"Con chào mẹ ạ.",spell:"Chào mẹ khi mẹ đi làm về",emoji:"👋",keywords:["chào","mẹ","ạ"],tinhHuong:"Mẹ đi làm về, con chạy ra chào",mau:"Con chào mẹ ạ!"},
+{text:"Con chào bạn ạ.",spell:"Chào bạn bè lễ phép",emoji:"🤝",keywords:["chào","bạn"],tinhHuong:"Gặp bạn mới",mau:"Tớ chào bạn!"},
+{text:"Con cảm ơn bà ạ.",spell:"Cảm ơn - Khi được cho quà, được giúp",emoji:"🎁",keywords:["cảm","ơn","bà","ạ"],tinhHuong:"Bà cho con bánh, con nói cảm ơn",mau:"Con cảm ơn bà ạ!"},
+{text:"Con cảm ơn mẹ ạ.",spell:"Cảm ơn mẹ nấu cơm",emoji:"🥰",keywords:["cảm","ơn","mẹ"],tinhHuong:"Mẹ nấu cơm cho con ăn",mau:"Con cảm ơn mẹ ạ, cơm ngon lắm ạ!"},
+{text:"Con cảm ơn bạn ạ.",spell:"Cảm ơn bạn",emoji:"💝",keywords:["cảm","ơn","bạn"],tinhHuong:"Bạn cho mượn bút",mau:"Tớ cảm ơn bạn nhé!"},
+{text:"Con xin lỗi bà ạ.",spell:"Xin lỗi - Khi làm sai, va phải ai",emoji:"😔",keywords:["xin","lỗi","bà"],tinhHuong:"Con lỡ làm đổ nước, va vào bà",mau:"Con xin lỗi bà ạ!"},
+{text:"Con xin lỗi bạn ạ.",spell:"Xin lỗi bạn",emoji:"🤲",keywords:["xin","lỗi","bạn"],tinhHuong:"Lỡ làm bạn buồn, giẫm chân bạn",mau:"Tớ xin lỗi bạn nhé!"},
+{text:"Con xin lỗi mẹ ạ.",spell:"Xin lỗi mẹ",emoji:"😢",keywords:["xin","lỗi","mẹ"],tinhHuong:"Con làm mẹ buồn",mau:"Con xin lỗi mẹ ạ, lần sau con không thế nữa ạ!"},
+{text:"Cho con xin ạ.",spell:"Xin - Khi muốn xin cái gì",emoji:"🙋",keywords:["cho","con","xin"],tinhHuong:"Muốn xin bánh, xin nước",mau:"Bà ơi, cho con xin cái bánh ạ!"},
+{text:"Mẹ ơi, cho con xin nước ạ.",spell:"Xin nước uống",emoji:"🥤",keywords:["cho","xin","nước"],tinhHuong:"Con khát nước, xin mẹ",mau:"Mẹ ơi, cho con xin nước ạ!"},
+{text:"Bạn ơi, cho tớ mượn bút nhé.",spell:"Xin mượn đồ - Lịch sự",emoji:"✏️",keywords:["cho","mượn","bút"],tinhHuong:"Muốn mượn đồ của bạn",mau:"Bạn ơi, cho tớ mượn bút nhé, tớ cảm ơn!"},
+{text:"Con thưa bà, con đi ạ.",spell:"Thưa gửi khi đi, khi về",emoji:"🚶",keywords:["thưa","bà","đi"],tinhHuong:"Khi đi đâu, con phải thưa",mau:"Con thưa bà, con đi học ạ!"},
+{text:"Con thưa mẹ, con về rồi ạ.",spell:"Thưa khi về nhà",emoji:"🏠",keywords:["thưa","mẹ","về"],tinhHuong:"Đi học về, con thưa mẹ",mau:"Con thưa mẹ, con về rồi ạ!"}
+]},
+{id:1,name:"Lớp 1",desc:"Âm Vần",items:[
+{text:"Ba",spell:"Bờ a ba - ba huyền bà",emoji:"👨",keywords:["ba"]},
+{text:"Mẹ",spell:"Mờ e me nặng mẹ",emoji:"👩",keywords:["mẹ","me"]},
+{text:"Bé chào bà ạ.",spell:"Bé - chào - bà - ạ",emoji:"👋",keywords:["bé","chào","bà","ạ"]},
+{text:"Con cá bơi.",spell:"Con - cá - bơi",emoji:"🐟",keywords:["con","cá","bơi"]},
+{text:"Nhà bé có gà.",spell:"Nhà - bé - có - gà",emoji:"🏠",keywords:["nhà","bé","gà"]},
+{text:"Con dạ ạ.",spell:"Con - dạ - ạ",emoji:"🙏",keywords:["con","dạ","ạ"]}
+]},
+{id:2,name:"Lớp 2",desc:"Từ Câu",items:[
+{text:"Bà ngoại hiền lắm.",spell:"Bà - ngoại - hiền - lắm",emoji:"👵",keywords:["bà","ngoại","hiền","lắm"]},
+{text:"Trường học của em rất vui.",spell:"Trường - học - của - em - rất - vui",emoji:"🏫",keywords:["trường","học","vui"]},
+{text:"Con mèo đang ngủ.",spell:"Con - mèo - đang - ngủ",emoji:"😺",keywords:["mèo","ngủ","đang"]},
+{text:"Con muốn uống nước ạ.",spell:"Con - muốn - uống - nước - ạ",emoji:"🥤",keywords:["muốn","uống","nước"]}
+]},
+{id:3,name:"Lớp 3",desc:"Đoạn văn",items:[
+{text:"Đây là con mèo. Con mèo màu trắng. Nó kêu meo meo.",spell:"Đoạn văn 3 câu",emoji:"🐈",keywords:["mèo","trắng"]},
+{text:"Buổi sáng, mặt trời mọc. Chim hót líu lo.",spell:"Đoạn văn kể",emoji:"🌅",keywords:["sáng","mặt trời","chim"]}
+]},
+{id:4,name:"Lớp 4-5",desc:"Bài văn",items:[
+{text:"Quê em có dòng sông xanh mát. Buổi chiều, em ra bờ sông chơi. Em yêu quê em lắm.",spell:"Bài văn tả quê hương",emoji:"🌾",keywords:["quê","sông","yêu"]},
+{text:"Mẹ dậy sớm nấu cơm. Mẹ nấu món ngon cho cả nhà. Em thương mẹ nhiều.",spell:"Bài văn tả mẹ",emoji:"👩‍🍳",keywords:["mẹ","cơm","ngon"]}
+]}
+];
+let curG=0,curI=0,rate=0.7,voice=null,viVoices=[],isListening=false,recognition=null,scoreTotal=0,attempts=0;
+
+function addCustom(){
+const input=document.getElementById('customInput');
+let text=input.value.trim();
+if(!text){alert('Con gõ câu muốn học vào nhé!');return;}
+text=text.normalize('NFC');
+if(!text.endsWith('.') && !text.endsWith('!') && !text.endsWith('?') && !text.endsWith('ạ')) text+='.';
+const keywords=text.toLowerCase().replace(/[.,!?]/g,'').split(' ').filter(w=>w.length>0);
+const customItem={text:text, spell:`Tự nhập: ${text.split(' ').join(' - ')}`, emoji:'💖', keywords:keywords, tinhHuong:'Tự nhập - Bé tự chọn học'};
+// Thêm vào nhóm Lời Hay
+grades[0].items.unshift(customItem);
+curG=0;curI=0;initTabs();render();hideFeedback();
+input.value='';
+doSpeak(text,0.75);
+document.getElementById('voiceStatus').textContent=`✅ Đã thêm: "${text}" - Đang học`;
+}
+
+function quickAdd(t){document.getElementById('customInput').value=t;addCustom();}
+
+function initTabs(){
+document.getElementById('tabs').innerHTML=grades.map((g,i)=>`<button class="tab ${i===curG?'active':''}" onclick="selectG(${i})">${g.name}<br><small>${g.desc}</small></button>`).join('');
+}
+function selectG(i){curG=i;curI=0;initTabs();render();hideFeedback();}
+function render(){
+const it=grades[curG].items[curI];
+document.getElementById('emoji').textContent=it.emoji;
+document.getElementById('txt').textContent=it.text;
+let extra = it.spell;
+if(it.tinhHuong){
+  extra = `🎬 Tình huống: ${it.tinhHuong} | ${it.spell}`;
+}
+document.getElementById('spell').textContent=extra;
+if(it.mau){
+  // Show mau cau as suggestion hint
+  document.getElementById('spell').textContent += ` | Mẫu: "${it.mau}"`;
+}
+}
+function hideFeedback(){document.getElementById('feedbackBox').style.display='none';document.getElementById('transcript').style.display='none';}
+
+function loadVoices(){
+const all=speechSynthesis.getVoices();
+viVoices=all.filter(v=>v.lang.toLowerCase().startsWith('vi'));
+const sel=document.getElementById('voiceSelect');
+sel.innerHTML='';
+if(viVoices.length===0){
+  const o=document.createElement('option');o.textContent='Đang tìm giọng Việt... (Edge có sẵn)';sel.appendChild(o);
+  document.getElementById('voiceStatus').textContent='✅ Edge đã có tiếng Việt - Sẵn sàng';
+  voice=null;
+  return;
+}
+viVoices.forEach(v=>{
+  const o=document.createElement('option');o.value=v.name;o.textContent=`${v.name} (${v.lang}) - Giọng Nam`;sel.appendChild(o);
+});
+voice=viVoices[0];sel.value=voice.name;
+document.getElementById('voiceStatus').textContent=`✅ Giọng Nam Miền Nam: ${voice.name} - Edge đã sẵn sàng`;
+}
+function updateVoice(){const n=document.getElementById('voiceSelect').value;voice=viVoices.find(v=>v.name===n)||viVoices[0];}
+
+function speakMain(){doSpeak(grades[curG].items[curI].text,rate);}
+function speakSlow(){
+const t=grades[curG].items[curI].text;const words=t.split(' ');let i=0;
+function nextW(){if(i>=words.length)return;doSpeak(words[i],0.55,()=>{i++;setTimeout(nextW,500);});}nextW();
+}
+function doSpeak(text,r,cb){
+speechSynthesis.cancel();
+const u=new SpeechSynthesisUtterance(text.normalize('NFC'));
+if(voice) u.voice=voice;
+u.lang='vi-VN';u.rate=r;u.volume=1;u.pitch=0.88;
+if(cb) u.onend=cb;
+speechSynthesis.speak(u);
+}
+function setRate(v){
+rate=v;
+document.querySelectorAll('.speed button').forEach(b=>b.classList.remove('active'));
+if(v===0.7) sSlow.classList.add('active');
+if(v===0.85) sMid.classList.add('active');
+if(v===1) sFast.classList.add('active');
+}
+function next(){if(curI<grades[curG].items.length-1)curI++;else if(curG<grades.length-1){curG++;curI=0;initTabs();}render();hideFeedback();}
+function prev(){if(curI>0)curI--;else if(curG>0){curG--;curI=grades[curG].items.length-1;initTabs();}render();hideFeedback();}
+
+// === CHỨC NĂNG MỚI: NGHE VÀ CHẤM ĐIỂM ===
+function initRecognition(){
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){alert('Trình duyệt này chưa hỗ trợ nghe giọng nói. Hãy dùng Microsoft Edge hoặc Chrome mới nhất trên điện thoại.');return null;}
+const rec=new SR();
+rec.lang='vi-VN';
+rec.continuous=false;
+rec.interimResults=false;
+rec.maxAlternatives=3;
+return rec;
+}
+
+function toggleListen(){
+if(isListening){stopListen();return;}
+startListen();
+}
+
+function startListen(){
+recognition=initRecognition();
+if(!recognition) return;
+isListening=true;
+document.getElementById('micBtn').classList.add('listening');
+document.getElementById('micIcon').textContent='🔴';
+document.getElementById('micText').textContent='Đang nghe...';
+document.getElementById('micSub').textContent='Bé nói to rõ nhé!';
+document.getElementById('wave').style.display='flex';
+document.getElementById('hearing').style.display='block';
+hideFeedback();
+
+recognition.onresult=(event)=>{
+const transcript=event.results[0][0].transcript;
+const confidence=event.results[0][0].confidence;
+handleResult(transcript, confidence);
+};
+recognition.onerror=(e)=>{
+console.log(e);
+stopListen();
+alert('Không nghe rõ. Bé nói lại to hơn nhé! Nhớ cho phép dùng micro.');
+};
+recognition.onend=()=>{stopListen();};
+recognition.start();
+}
+
+function stopListen(){
+isListening=false;
+document.getElementById('micBtn').classList.remove('listening');
+document.getElementById('micIcon').textContent='🎙️';
+document.getElementById('micText').textContent='Bấm để bé nói';
+document.getElementById('micSub').textContent='Cho phép dùng micro khi hỏi';
+document.getElementById('wave').style.display='none';
+document.getElementById('hearing').style.display='none';
+if(recognition) try{recognition.stop();}catch(e){}
+}
+
+function normalizeVN(s){
+return s.toLowerCase().normalize('NFC').replace(/[.,!?;:]/g,'').trim();
+}
+
+function calculateScore(target, said){
+const tNorm=normalizeVN(target);
+const sNorm=normalizeVN(said);
+if(tNorm===sNorm) return 100;
+if(sNorm.includes(tNorm) || tNorm.includes(sNorm)) return 85;
+const tWords=tNorm.split(' ').filter(w=>w.length>0);
+const sWords=sNorm.split(' ');
+let matched=0;
+tWords.forEach(w=>{
+  if(sWords.some(sw=>sw.includes(w)||w.includes(sw)||levenshtein(w,sw)<=1)) matched++;
+});
+const score=Math.round((matched/tWords.length)*100);
+return Math.min(score,95);
+}
+
+function levenshtein(a,b){
+const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;
+for(let i=1;i<=b.length;i++)for(let j=1;j<=a.length;j++)m[i][j]=b.charAt(i-1)==a.charAt(j-1)?m[i-1][j-1]:Math.min(m[i-1][j-1]+1,m[i][j-1]+1,m[i-1][j]+1);
+return m[b.length][a.length];
+}
+
+function handleResult(said, confidence){
+document.getElementById('transcript').style.display='block';
+document.getElementById('saidText').textContent=`"${said}"`;
+const target=grades[curG].items[curI].text;
+const score=calculateScore(target, said);
+attempts++;scoreTotal+=score;
+const avgScore=Math.round(scoreTotal/attempts);
+
+const feedbackBox=document.getElementById('feedbackBox');
+feedbackBox.style.display='block';
+const starsEl=document.getElementById('stars');
+const fbEl=document.getElementById('feedbackText');
+const sugEl=document.getElementById('suggestion');
+const progress=document.getElementById('progressBar');
+
+let stars='',fb='',sug='';
+
+if(score>=90){
+  stars='⭐⭐⭐⭐⭐';
+  fb=`✅ Tuyệt vời! Bé nói rất chuẩn! Giống thầy đến ${score}% luôn!`;
+  sug=`🎉 Con giỏi quá! Thầy khen con! Con đã nói đúng câu: "${target}"`;
+  doSpeak('Con giỏi quá! Nói chuẩn lắm! Tuyệt vời!',0.85);
+} else if(score>=60){
+  stars='⭐⭐⭐⭐';
+  fb=`🟢 Gần đúng rồi! Bé nói được ${score}% giống thầy rồi! Cố thêm chút nữa nhé!`;
+  const missing=grades[curG].items[curI].keywords.filter(k=>!normalizeVN(said).includes(k));
+  if(missing.length>0){
+    sug=`🔍 Thầy nghe thiếu mấy từ: "${missing.join(', ')}". Con thử nói lại cả câu nhé: "${target}" - Nói chậm từng chữ: ${grades[curG].items[curI].spell}`;
+  } else {
+    sug=`💡 Con nói lại chậm hơn một chút nhé: "${target}". Nhớ đọc rõ dấu nhé: ${target.includes('ạ')?'chữ ạ phải đọc rõ dấu nặng nhé!':''}`;
+  }
+  doSpeak('Gần đúng rồi! Thử lại một lần nữa nhé con yêu!',0.85);
+} else {
+  stars='⭐⭐';
+  fb=`🟡 Bé cố gắng rồi! Mới được ${score}% thôi, mình thử lại nhé con yêu!`;
+  sug=`👂 Thầy nghe bé nói "${said}" nhưng bài là "${target}". Con nghe thầy đọc mẫu lại nhé rồi nói theo!`;
+  // Tự động đọc lại mẫu cho bé
+  setTimeout(()=>doSpeak(target,0.7),1000);
+}
+
+starsEl.textContent=stars;
+fbEl.textContent=fb;
+if(sug){
+  sugEl.style.display='block';
+  sugEl.innerHTML=sug;
+} else {
+  sugEl.style.display='none';
+}
+progress.style.width=`${avgScore}%`;
+
+if(score>=80){
+  setTimeout(()=>{if(confirm('Bé giỏi quá! Qua câu tiếp theo nhé?')) next();},2000);
+}
+}
+
+window.onload=()=>{
+initTabs();render();loadVoices();
+setTimeout(loadVoices,800);
+speechSynthesis.onvoiceschanged=loadVoices;
+};
+</script>
+</body>
+</html>
