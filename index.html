@@ -1,15 +1,24 @@
-<!DOCTYPE html>
+from pathlib import Path
+
+html = r'''<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#2878d0">
 <meta name="description" content="Ứng dụng luyện đọc tiếng Việt dành cho học sinh tiểu học.">
-<title>Bé Luyện Đọc Tiếng Việt - Cô Giáo Nói Chi Tiết</title>
+<title>Bé Luyện Đọc Tiếng Việt</title>
 <style>
-:root{--blue:#2878d0;--dark:#1756a4;--pink:#ff78a7;--green:#199b67;--text:#25364d;--muted:#64748b;--border:#dce8f5;--shadow:0 8px 28px #2358911a}
+:root{
+  --blue:#2878d0;--dark:#1756a4;--pink:#ff78a7;--green:#199b67;
+  --text:#25364d;--muted:#64748b;--border:#dce8f5;
+  --shadow:0 8px 28px #2358911a;
+}
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(180deg,#edf7ff,#fff7fb 70%,#f5faff);color:var(--text);font:16px/1.6 Arial,Helvetica,sans-serif}
+body{
+  margin:0;background:linear-gradient(180deg,#edf7ff,#fff7fb 70%,#f5faff);
+  color:var(--text);font:16px/1.6 Arial,Helvetica,sans-serif
+}
 button,input,select,textarea{font:inherit}
 button{cursor:pointer}
 button:disabled{opacity:.55;cursor:not-allowed}
@@ -59,140 +68,174 @@ input:focus,select:focus,textarea:focus{outline:3px solid #d5eaff;border-color:v
 audio{width:100%;margin-top:12px}
 .detailBox{background:#fff8e6;border:1px dashed #f59e0b;border-radius:12px;padding:12px;margin-top:12px;font-size:15px;line-height:1.6}
 footer{text-align:center;color:var(--muted);font-size:13px;padding:12px 0}
-@media(max-width:720px){.layout{grid-template-columns:1fr}header{padding-top:18px}.card{padding:16px;border-radius:18px}.btn-row>.btn{flex:1 1 140px}.sentence{padding:20px 10px}}
+.mouth-card{background:#fff;border:2px solid #ffd5e5;border-radius:18px;padding:16px;margin:15px 0}
+.mouth-card h3{color:#c13e78;margin:0 0 8px}
+.mouth-display{background:linear-gradient(145deg,#fff0f6,#edf6ff);border-radius:16px;padding:18px 10px;text-align:center;margin:12px 0}
+.mouth-shape{width:105px;height:76px;margin:8px auto 15px;background:#b83259;border:5px solid #922344;border-radius:50%;position:relative;display:flex;justify-content:center;align-items:flex-start;overflow:hidden;transition:all .2s}
+.mouth-teeth{width:65%;height:14px;background:#fff;border:1px solid #ddd;border-radius:0 0 10px 10px;margin-top:1px}
+.mouth-a{height:90px;width:105px}
+.mouth-aw{height:75px;width:100px}
+.mouth-eh{height:52px;width:110px}
+.mouth-e{height:42px;width:125px}
+.mouth-i{height:25px;width:125px}
+.mouth-o{height:48px;width:65px}
+.mouth-oh{height:38px;width:75px}
+.mouth-ow{height:40px;width:90px}
+.mouth-u{height:25px;width:48px}
+.mouth-uw{height:32px;width:65px}
+#mouthLetter{font-size:32px;color:var(--dark);font-weight:900}
+#mouthGuide{font-weight:bold;color:#a72f54;margin-top:5px}
+.mouth-buttons{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.mouth-buttons button{min-width:43px;min-height:42px;border:1px solid #f5bad1;background:#fff0f6;color:#a72f65;border-radius:10px;font-weight:900}
+.mouth-buttons button.active{background:var(--blue);color:white;border-color:var(--blue)}
+@media(max-width:720px){
+  .layout{grid-template-columns:1fr}
+  header{padding-top:18px}
+  .card{padding:16px;border-radius:18px}
+  .btn-row>.btn{flex:1 1 140px}
+  .sentence{padding:20px 10px}
+}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
 <div class="container">
 <header>
-<div class="mascot" aria-hidden="true">👩‍🏫📚🌈</div>
-<h1>BÉ LUYỆN ĐỌC TIẾNG VIỆT</h1>
-<p class="subtitle">Cô giáo nghe – Nhận xét chi tiết – Sửa từng chữ</p>
-<div class="tagline">🌟 Mỗi lần đọc là một lần giỏi hơn!</div>
+  <div class="mascot" aria-hidden="true">👩‍🏫📚🌈</div>
+  <h1>BÉ LUYỆN ĐỌC TIẾNG VIỆT</h1>
+  <p class="subtitle">Cô giáo nghe – Nhận xét ngắn gọn – Hướng dẫn từng từ</p>
+  <div class="tagline">🌟 Mỗi lần đọc là một lần giỏi hơn!</div>
 </header>
 
 <main class="layout">
 <div>
 <section class="card">
-<h2>📖 1. Bài đọc của bé</h2>
-<div class="field">
-<label for="lessonSelect">Chọn câu luyện đọc</label>
-<select id="lessonSelect"></select>
-</div>
-<div id="sentence" class="sentence" aria-live="polite">Con chào ông bà ạ.</div>
-<div class="btn-row">
-<button id="sampleBtn" class="btn primary">🔊 Nghe mẫu</button>
-<button id="slowBtn" class="btn pink">🐢 Đọc chậm</button>
-</div>
-<div class="field">
-<label for="speedSelect">Tốc độ đọc mẫu</label>
-<select id="speedSelect">
-<option value="0.55">Rất chậm - từng chữ</option>
-<option value="0.75" selected>Chậm vừa - cô giáo đọc</option>
-<option value="1">Bình thường</option>
-</select>
-</div>
-<div class="field">
-<label for="voiceSelect">Giọng đọc tiếng Việt</label>
-<select id="voiceSelect"><option value="">Giọng tiếng Việt mặc định của thiết bị</option></select>
-<p class="small">Ưu tiên Edge có giọng Nam/Nữ chuẩn. Chrome Android cũng tốt.</p>
-</div>
-<div class="btn-row">
-<button id="micBtn" class="btn green full">🎙 Bé đọc vào micro</button>
-</div>
-<div id="micStatus" class="status" role="status" aria-live="polite">Nhấn nút micro, cho phép dùng micro rồi đọc câu mẫu.</div>
-<div id="transcriptArea" class="hidden">
-<h3>📝 Lời bé vừa đọc</h3>
-<div id="transcript" class="transcript" aria-live="polite"></div>
-</div>
-<div id="resultBox" class="result hidden" aria-live="polite">
-<h3 id="resultTitle">🌟 Cô giáo nhận xét</h3>
-<div id="stars" class="stars" aria-label="Số sao"></div>
-<div id="feedbackText" class="feedback"></div>
-<div id="detailFeedback" class="detailBox"></div>
+  <h2>📖 1. Bài đọc của bé</h2>
+  <div class="field">
+    <label for="lessonSelect">Chọn câu luyện đọc</label>
+    <select id="lessonSelect"></select>
+  </div>
+  <div id="sentence" class="sentence" aria-live="polite">Con chào ông bà ạ.</div>
 
-<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:12px;margin-top:12px;text-align:left">
-<div style="font-weight:900;font-size:14px;margin-bottom:6px">📊 BẢNG ĐIỂM & NHẬN XÉT NGẮN GỌN:</div>
-<div id="levelBadge" style="display:inline-block;padding:6px 12px;border-radius:999px;font-weight:900;font-size:14px;margin-bottom:8px">Chưa chấm</div>
-<div id="shortScore" style="font-size:16px;font-weight:800"></div>
-<div style="font-size:13px;color:#475569;margin-top:8px;line-height:1.5">
-<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:6px">
-<tr style="background:#dcfce7"><td style="padding:4px 6px;border:1px solid #e5e7eb">95-100%</td><td style="padding:4px 6px;border:1px solid #e5e7eb">⭐⭐⭐⭐⭐ Xuất sắc</td><td style="padding:4px 6px;border:1px solid #e5e7eb">Đúng hết, có ạ lễ phép</td></tr>
-<tr style="background:#e0f2fe"><td style="padding:4px 6px;border:1px solid #e5e7eb">80-94%</td><td style="padding:4px 6px;border:1px solid #e5e7eb">⭐⭐⭐⭐ Rất tốt</td><td style="padding:4px 6px;border:1px solid #e5e7eb">Thiếu 1-2 chữ nhỏ</td></tr>
-<tr style="background:#fef9c3"><td style="padding:4px 6px;border:1px solid #e5e7eb">60-79%</td><td style="padding:4px 6px;border:1px solid #e5e7eb">⭐⭐⭐ Khá</td><td style="padding:4px 6px;border:1px solid #e5e7eb">Đúng một nửa, cần luyện thêm</td></tr>
-<tr style="background:#ffedd5"><td style="padding:4px 6px;border:1px solid #e5e7eb">35-59%</td><td style="padding:4px 6px;border:1px solid #e5e7eb">⭐⭐ Cố gắng</td><td style="padding:4px 6px;border:1px solid #e5e7eb">Mới được vài chữ, chia nhỏ để đọc</td></tr>
-<tr style="background:#fee2e2"><td style="padding:4px 6px;border:1px solid #e5e7eb">0-34%</td><td style="padding:4px 6px;border:1px solid #e5e7eb">⭐ Bắt đầu</td><td style="padding:4px 6px;border:1px solid #e5e7eb">Chưa khớp, nghe mẫu lại</td></tr>
-</table>
-</div>
-</div>
+  <section class="mouth-card">
+    <h3>👄 Cô hướng dẫn khẩu hình</h3>
+    <p class="small">Chọn nguyên âm, quan sát hình minh họa và làm theo nhé!</p>
+    <div class="mouth-display">
+      <div id="mouthShape" class="mouth-shape mouth-a"><div class="mouth-teeth"></div></div>
+      <div id="mouthLetter">A</div>
+      <div id="mouthGuide">Mở miệng rộng, hạ hàm dưới.</div>
+    </div>
+    <div id="mouthButtons" class="mouth-buttons"></div>
+    <button id="mouthSpeakBtn" class="btn pink full" type="button">🔊 Nghe âm đang chọn</button>
+    <p class="small">Nhìn hình – Làm theo – Đọc thành tiếng. Hình là minh họa khẩu hình cơ bản.</p>
+  </section>
 
-<div class="score-track"><div id="scoreBar" class="score-bar"></div></div>
-<div id="scoreLabel" class="small"></div>
-<h4>🔎 Đối chiếu từng chữ</h4>
-<div id="wordComparison" class="word-list"></div>
-<div class="btn-row">
-<button id="speakFeedbackBtn" class="btn primary">🔊 Nghe cô nhận xét lại</button>
-<button id="replaySampleBtn" class="btn orange">🔁 Nghe mẫu chậm để sửa</button>
-</div>
-</div>
+  <div class="btn-row">
+    <button id="sampleBtn" class="btn primary" type="button">🔊 Nghe mẫu</button>
+    <button id="slowBtn" class="btn pink" type="button">🐢 Đọc chậm</button>
+  </div>
+  <div class="field">
+    <label for="speedSelect">Tốc độ đọc mẫu</label>
+    <select id="speedSelect">
+      <option value="0.55">Rất chậm</option>
+      <option value="0.75" selected>Chậm vừa</option>
+      <option value="1">Bình thường</option>
+    </select>
+  </div>
+  <div class="field">
+    <label for="voiceSelect">Giọng đọc tiếng Việt</label>
+    <select id="voiceSelect"><option value="">Giọng tiếng Việt mặc định của thiết bị</option></select>
+    <p class="small">Danh sách giọng đọc tùy thiết bị và trình duyệt.</p>
+  </div>
+  <div class="btn-row">
+    <button id="micBtn" class="btn green full" type="button">🎙 Bé đọc vào micro</button>
+  </div>
+  <div id="micStatus" class="status" role="status" aria-live="polite">Nhấn nút micro, cho phép sử dụng micro rồi đọc câu mẫu.</div>
+
+  <div id="transcriptArea" class="hidden">
+    <h3>📝 Lời bé vừa đọc</h3>
+    <div id="transcript" class="transcript" aria-live="polite"></div>
+  </div>
+
+  <div id="resultBox" class="result hidden" aria-live="polite">
+    <h3 id="resultTitle">🌟 Cô giáo nhận xét</h3>
+    <div id="stars" class="stars" aria-label="Số sao"></div>
+    <div id="feedbackText" class="feedback"></div>
+    <div id="detailFeedback" class="detailBox"></div>
+    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:12px;margin-top:12px;text-align:left">
+      <div style="font-weight:900;font-size:14px;margin-bottom:6px">📊 BẢNG ĐIỂM</div>
+      <div id="levelBadge" style="display:inline-block;padding:6px 12px;border-radius:999px;font-weight:900;font-size:14px;margin-bottom:8px">Chưa chấm</div>
+      <div id="shortScore" style="font-size:16px;font-weight:800"></div>
+      <p class="small">Điểm là tỷ lệ từ được nhận dạng trùng với câu mẫu, không phải điểm phát âm tuyệt đối.</p>
+    </div>
+    <div class="score-track"><div id="scoreBar" class="score-bar"></div></div>
+    <div id="scoreLabel" class="small"></div>
+    <h4>🔎 Đối chiếu từng từ</h4>
+    <div id="wordComparison" class="word-list"></div>
+    <div class="btn-row">
+      <button id="speakFeedbackBtn" class="btn primary" type="button">🔊 Nghe cô nhận xét</button>
+      <button id="replaySampleBtn" class="btn orange" type="button">🔁 Nghe mẫu chậm</button>
+    </div>
+  </div>
 </section>
 
 <section class="card">
-<h2>✏ 2. Thêm câu luyện đọc</h2>
-<div class="field">
-<label for="customSentence">Nhập câu mới bé muốn học</label>
-<textarea id="customSentence" maxlength="300" placeholder="Ví dụ: Con cảm ơn mẹ ạ."></textarea>
-</div>
-<button id="addSentenceBtn" class="btn orange full">➕ Thêm câu vào danh sách</button>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-<button class="btn gray" onclick="quickAdd('Con cảm ơn mẹ ạ.')">Cảm ơn</button>
-<button class="btn gray" onclick="quickAdd('Con xin lỗi mẹ ạ.')">Xin lỗi</button>
-<button class="btn gray" onclick="quickAdd('Con chào cô ạ.')">Chào hỏi</button>
-<button class="btn gray" onclick="quickAdd('Con xin phép mẹ ạ.')">Xin phép</button>
-</div>
+  <h2>✏ 2. Thêm câu luyện đọc</h2>
+  <div class="field">
+    <label for="customSentence">Nhập câu mới bé muốn học</label>
+    <textarea id="customSentence" maxlength="300" placeholder="Ví dụ: Con cảm ơn mẹ ạ."></textarea>
+  </div>
+  <button id="addSentenceBtn" class="btn orange full" type="button">➕ Thêm câu vào danh sách</button>
+  <div class="btn-row">
+    <button class="btn gray" type="button" data-quick="Con cảm ơn mẹ ạ.">Cảm ơn</button>
+    <button class="btn gray" type="button" data-quick="Con xin lỗi mẹ ạ.">Xin lỗi</button>
+    <button class="btn gray" type="button" data-quick="Con chào cô ạ.">Chào hỏi</button>
+    <button class="btn gray" type="button" data-quick="Con xin phép mẹ ạ.">Xin phép</button>
+  </div>
 </section>
 
 <section class="card">
-<h2>🎧 3. Thu âm giọng đọc của bé</h2>
-<p>Để nghe lại tiến bộ của bé. Không thay thế chấm điểm.</p>
-<div class="btn-row">
-<button id="recordBtn" class="btn danger">🔴 Bắt đầu thu âm</button>
-<button id="stopRecordBtn" class="btn gray" disabled>⏹ Dừng thu âm</button>
-</div>
-<div id="recordStatus" class="status" role="status" aria-live="polite">Chưa có bản ghi âm.</div>
-<div id="audioArea" class="hidden">
-<audio id="playback" controls></audio>
-<div class="btn-row"><button id="downloadBtn" class="btn primary">⬇ Tải bản ghi âm</button></div>
-</div>
+  <h2>🎧 3. Thu âm giọng đọc của bé</h2>
+  <p>Thu âm để nghe lại giọng đọc. Chức năng này không tự chấm điểm.</p>
+  <div class="btn-row">
+    <button id="recordBtn" class="btn danger" type="button">🔴 Bắt đầu thu âm</button>
+    <button id="stopRecordBtn" class="btn gray" type="button" disabled>⏹ Dừng thu âm</button>
+  </div>
+  <div id="recordStatus" class="status" role="status" aria-live="polite">Chưa có bản ghi âm.</div>
+  <div id="audioArea" class="hidden">
+    <audio id="playback" controls></audio>
+    <div class="btn-row"><button id="downloadBtn" class="btn primary" type="button">⬇ Tải bản ghi âm</button></div>
+  </div>
 </section>
 </div>
 
 <div>
 <section class="card">
-<h2>💖 4. Cô giáo dặn bé</h2>
-<div id="teacherTip" style="background:#eaf4ff;border-radius:12px;padding:12px;font-size:15px">Bé chọn câu rồi bấm Nghe mẫu trước nhé. Sau đó bấm micro và đọc to, rõ từng chữ. Cô sẽ chỉ cho bé chỗ nào đúng, chỗ nào cần sửa.</div>
-<h3 style="margin-top:16px">🌱 Khi bé đọc chưa rõ</h3>
-<p>Cô sẽ đọc chậm từng chữ để bé nghe rõ dấu thanh: sắc, huyền, hỏi, ngã, nặng.</p>
-<h3>🌟 Khi bé đọc tốt</h3>
-<p>Cô khen và chỉ cho bé cách đọc hay hơn, có cảm xúc hơn.</p>
-</div>
-
-<section class="card">
-<h2>📚 5. Chọn nhanh câu đọc</h2>
-<div id="lessonChips" class="lesson-list"></div>
+  <h2>💖 4. Cô giáo dặn bé</h2>
+  <div id="teacherTip" style="background:#eaf4ff;border-radius:12px;padding:12px;font-size:15px">
+    Bé chọn câu, nghe mẫu rồi bấm micro đọc to và rõ nhé. Cô sẽ chỉ những từ con cần luyện thêm.
+  </div>
+  <h3 style="margin-top:16px">🌱 Khi đọc chưa rõ</h3>
+  <p>Con nghe mẫu chậm, nhìn khẩu hình và đọc lại từng từ.</p>
+  <h3>🌟 Khi đọc tốt</h3>
+  <p>Con thử đọc tự nhiên, rõ ràng và có cảm xúc hơn nhé!</p>
 </section>
 
 <section class="card">
-<h2>💡 Hướng dẫn</h2>
-<ol>
-<li>Bấm Nghe mẫu để nhớ câu.</li>
-<li>Bấm micro và đọc hết câu.</li>
-<li>Nghe cô nhận xét chi tiết: thiếu chữ nào, đúng chữ nào.</li>
-<li>Bấm Nghe mẫu chậm để sửa lại.</li>
-<li>Luyện lại cho đến khi được 5 sao.</li>
-</ol>
-<p class="hint">Điểm khớp văn bản phụ thuộc nhận dạng tiếng Việt của trình duyệt. Cô giáo nhận xét dựa trên từ bé đọc được, không phải điểm phát âm tuyệt đối.</p>
+  <h2>📚 5. Chọn nhanh câu đọc</h2>
+  <div id="lessonChips" class="lesson-list"></div>
+</section>
+
+<section class="card">
+  <h2>💡 Hướng dẫn</h2>
+  <ol>
+    <li>Chọn câu và nghe cô đọc mẫu.</li>
+    <li>Quan sát khẩu hình nguyên âm.</li>
+    <li>Bấm micro và đọc hết câu.</li>
+    <li>Xem từ đúng, từ cần luyện và nghe nhận xét.</li>
+    <li>Luyện lại đến khi đọc tốt hơn.</li>
+  </ol>
+  <p class="hint">Nhận dạng giọng nói phụ thuộc trình duyệt, thiết bị, micro và kết nối Internet. Một số điện thoại không hỗ trợ nhận dạng tiếng Việt.</p>
 </section>
 </div>
 </main>
@@ -203,18 +246,20 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:12px 0}
 "use strict";
 (() => {
 const $ = id => document.getElementById(id);
+
 const defaultLessons = [
-"Con chào ông bà ạ.",
-"Em yêu mái trường của em.",
-"Bé chăm học và chăm làm.",
-"Mẹ đưa em đến trường.",
-"Những bông hoa đang khoe sắc.",
-"Chim non hót líu lo trên cành.",
-"Con cảm ơn mẹ ạ.",
-"Con xin lỗi bạn ạ.",
-"Con chào cô giáo ạ.",
-"Con xin phép mẹ đi chơi ạ."
+  "Con chào ông bà ạ.",
+  "Em yêu mái trường của em.",
+  "Bé chăm học và chăm làm.",
+  "Mẹ đưa em đến trường.",
+  "Những bông hoa đang khoe sắc.",
+  "Chim non hót líu lo trên cành.",
+  "Con cảm ơn mẹ ạ.",
+  "Con xin lỗi bạn ạ.",
+  "Con chào cô giáo ạ.",
+  "Con xin phép mẹ đi chơi ạ."
 ];
+
 let lessons = [...defaultLessons];
 let currentIndex = 0;
 let voices = [];
@@ -230,468 +275,563 @@ let mediaStream = null;
 let audioChunks = [];
 let audioUrl = "";
 let isRecording = false;
+let ignoreRecognitionEnd = false;
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 function setStatus(id, message, type = "") {
-const el = $(id);
-el.textContent = message;
-el.className = "status" + (type ? " " + type : "");
+  const el = $(id);
+  el.textContent = message;
+  el.className = "status" + (type ? " " + type : "");
 }
 
 function normalize(text) {
-return String(text || "")
-.toLocaleLowerCase("vi-VN")
-.normalize("NFC")
-.replace(/[.,!?;:()[\]{}"'“”‘’…]/g, " ")
-.replace(/\s+/g, " ")
-.trim();
+  return String(text || "")
+    .toLocaleLowerCase("vi-VN")
+    .normalize("NFC")
+    .replace(/[.,!?;:()[\]{}"'“”‘’…]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function speak(text, rate = 0.8) {
-if (!("speechSynthesis" in window) || !window.SpeechSynthesisUtterance) {
-setStatus("micStatus", "Thiết bị chưa hỗ trợ đọc văn bản thành tiếng.", "error");
-return;
-}
-const content = String(text || "").trim();
-if (!content) return;
-window.speechSynthesis.cancel();
-const utterance = new SpeechSynthesisUtterance(content);
-utterance.lang = "vi-VN";
-utterance.rate = Math.max(0.5, Math.min(1.2, Number(rate) || 0.8));
-const selected = $("voiceSelect").value;
-const voice = voices.find(v => v.voiceURI === selected);
-if (voice) utterance.voice = voice;
-utterance.onerror = () => setStatus("micStatus", "Không phát được giọng đọc. Hãy thử lại.", "error");
-window.setTimeout(() => window.speechSynthesis.speak(utterance), 80);
+  if (!("speechSynthesis" in window) || !window.SpeechSynthesisUtterance) {
+    setStatus("micStatus", "Thiết bị chưa hỗ trợ đọc văn bản thành tiếng.", "error");
+    return;
+  }
+  const content = String(text || "").trim();
+  if (!content) return;
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(content);
+  utterance.lang = "vi-VN";
+  utterance.rate = Math.max(0.5, Math.min(1.2, Number(rate) || 0.8));
+
+  const selectedVoice = $("voiceSelect").value;
+  const voice = voices.find(v => v.voiceURI === selectedVoice);
+  if (voice) utterance.voice = voice;
+
+  utterance.onerror = () => {
+    setStatus("micStatus", "Không phát được giọng đọc. Hãy kiểm tra âm lượng hoặc thử lại.", "error");
+  };
+  window.speechSynthesis.speak(utterance);
 }
 
 function loadVoices() {
-if (!("speechSynthesis" in window)) return;
-voices = window.speechSynthesis.getVoices();
-const select = $("voiceSelect");
-const previous = select.value;
-select.innerHTML = "";
-const defaultOption = document.createElement("option");
-defaultOption.value = "";
-defaultOption.textContent = "Giọng tiếng Việt mặc định của thiết bị";
-select.appendChild(defaultOption);
-voices.filter(v => /^vi([-_]|$)/i.test(v.lang)).forEach(v => {
-const option = document.createElement("option");
-option.value = v.voiceURI;
-option.textContent = `${v.name} (${v.lang})`;
-select.appendChild(option);
-});
-if ([...select.options].some(o => o.value === previous)) select.value = previous;
+  if (!("speechSynthesis" in window)) return;
+  voices = window.speechSynthesis.getVoices();
+  const select = $("voiceSelect");
+  const previous = select.value;
+  select.innerHTML = "";
+
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "Giọng tiếng Việt mặc định của thiết bị";
+  select.appendChild(defaultOption);
+
+  voices.filter(v => /^vi([-_]|$)/i.test(v.lang)).forEach(v => {
+    const option = document.createElement("option");
+    option.value = v.voiceURI;
+    option.textContent = `${v.name} (${v.lang})`;
+    select.appendChild(option);
+  });
+
+  if ([...select.options].some(o => o.value === previous)) select.value = previous;
 }
 
 function renderLesson() {
-$("sentence").textContent = lessons[currentIndex];
-const sel = $("lessonSelect");
-sel.innerHTML = "";
-lessons.forEach((l,i)=>{
-const o=document.createElement("option");
-o.value=i;
-o.textContent=`Câu ${i+1} – ${l}`;
-sel.appendChild(o);
-});
-sel.value = String(currentIndex);
-$("lessonChips").innerHTML = "";
-lessons.forEach((lesson, index) => {
-const button = document.createElement("button");
-button.type = "button";
-button.className = "lesson-chip" + (index === currentIndex ? " active" : "");
-button.textContent = "Câu " + (index + 1);
-button.title = lesson;
-button.addEventListener("click", () => selectLesson(index));
-$("lessonChips").appendChild(button);
-});
-$("resultBox").classList.add("hidden");
-$("transcriptArea").classList.add("hidden");
-}
+  $("sentence").textContent = lessons[currentIndex];
 
-function selectLesson(index) {
-stopRecognitionIfNeeded();
-currentIndex = index;
-renderLesson();
-}
+  const select = $("lessonSelect");
+  select.innerHTML = "";
+  lessons.forEach((lesson, index) => {
+    const option = document.createElement("option");
+    option.value = index;
+    option.textContent = `Câu ${index + 1} – ${lesson}`;
+    select.appendChild(option);
+  });
+  select.value = String(currentIndex);
 
-function sampleRead(rate) {
-lastSampleForReplay = lessons[currentIndex];
-speak(lessons[currentIndex], rate);
+  $("lessonChips").innerHTML = "";
+  lessons.forEach((lesson, index) => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "lesson-chip" + (index === currentIndex ? " active" : "");
+    button.textContent = "Câu " + (index + 1);
+    button.title = lesson;
+    button.addEventListener("click", () => selectLesson(index));
+    $("lessonChips").appendChild(button);
+  });
+
+  $("resultBox").classList.add("hidden");
+  $("transcriptArea").classList.add("hidden");
 }
 
 function stopRecognitionIfNeeded() {
-if (recognition && listening) {
-try { recognition.stop(); } catch (e) { console.warn(e); }
+  if (recognition && listening) {
+    ignoreRecognitionEnd = true;
+    try { recognition.abort(); } catch (error) { console.warn(error); }
+    listening = false;
+    $("micBtn").textContent = "🎙 Bé đọc vào micro";
+  }
 }
+
+function selectLesson(index) {
+  stopRecognitionIfNeeded();
+  currentIndex = index;
+  renderLesson();
+  setStatus("micStatus", "Đã chọn câu mới. Bé nghe mẫu trước nhé!");
+}
+
+function sampleRead(rate) {
+  lastSampleForReplay = lessons[currentIndex];
+  speak(lessons[currentIndex], rate);
 }
 
 function compareWords(target, spoken) {
-const expected = normalize(target).split(" ").filter(Boolean);
-const actual = normalize(spoken).split(" ").filter(Boolean);
-const remaining = [...actual];
-let matches = 0;
-const comparison = expected.map(word => {
-const index = remaining.indexOf(word);
-if (index >= 0) {
-remaining.splice(index, 1);
-matches++;
-return { word, ok: true, type:'expected' };
-}
-return { word, ok: false, type:'expected' };
-});
-const extra = remaining.filter(w=>!expected.includes(w)).map(w=>({word:w, ok:false, type:'extra'}));
-return {
-score: expected.length ? Math.round(matches / expected.length * 100) : 0,
-comparison,
-extra,
-expected,
-actual,
-matches
-};
+  const expected = normalize(target).split(" ").filter(Boolean);
+  const actual = normalize(spoken).split(" ").filter(Boolean);
+  const remaining = [...actual];
+  let matches = 0;
+
+  const comparison = expected.map(word => {
+    const index = remaining.indexOf(word);
+    if (index >= 0) {
+      remaining.splice(index, 1);
+      matches++;
+      return { word, ok: true };
+    }
+    return { word, ok: false };
+  });
+
+  const extra = remaining.map(word => ({ word, ok: false }));
+  return {
+    score: expected.length ? Math.round(matches / expected.length * 100) : 0,
+    comparison, extra, expected, actual, matches
+  };
 }
 
-// === HÀM MỚI: NHẬN XÉT CHI TIẾT THEO MỨC ĐỘ ===
 function evaluateSpeech(spoken) {
   const target = lessons[currentIndex];
   const result = compareWords(target, spoken);
   const score = result.score;
-  const trimmed = spoken.trim();
-  const lowerSpoken = normalize(spoken);
-  
-  let feedbackTitle = "";
-  let feedbackShort = "";
-  let spokenFeedback = "";
-  let detailHTML = "";
-  let tip = "";
+  const text = String(spoken || "").trim();
 
-  const missingWords = result.comparison.filter(c=>!c.ok).map(c=>c.word);
-  const correctWords = result.comparison.filter(c=>c.ok).map(c=>c.word);
-  const extraWords = result.extra.map(e=>e.word);
+  const missing = result.comparison.filter(x => !x.ok).map(x => x.word);
+  const correct = result.comparison.filter(x => x.ok).map(x => x.word);
 
-  const hasA = normalize(target).includes("ạ");
-  const spokenHasA = lowerSpoken.includes("ạ");
+  let title, short, voice, tip, stars;
 
-  // PHÂN LOẠI MỨC ĐỘ
-  if (!trimmed) {
-    feedbackTitle = "👂 Cô chưa nghe rõ";
-    feedbackShort = "Cô chưa nghe rõ con đọc. Không sao đâu, mình thử lại nhé!";
-    spokenFeedback = "Cô chưa nghe rõ con đọc rồi. Không sao đâu con yêu! Con hãy đưa micro gần miệng hơn, nói to và rõ từng chữ nhé. Ví dụ cô đọc mẫu này, con nghe rồi đọc theo: " + target;
-    detailHTML = `🔴 <b>Nguyên nhân:</b> Có thể micro chưa bật, hoặc phòng ồn, hoặc con nói nhỏ quá.<br>👉 <b>Cách sửa:</b> Bấm micro lại, hít sâu, đọc to rõ: <b>${target}</b>`;
-    tip = "Con hãy bấm Nghe mẫu trước, rồi mới bấm micro đọc theo nhé.";
-  } 
-  else if (score >= 95) {
-    feedbackTitle = "🌟 Xuất sắc - 5 sao!";
-    feedbackShort = `Tuyệt vời! Con đọc đúng 100% rồi! Cô khen con đọc rất chuẩn câu: "${target}"`;
-    spokenFeedback = `Chúc mừng con yêu! Con đọc xuất sắc luôn! Cô nghe con đọc đúng hết tất cả các chữ: ${correctWords.join(", ")}. Giọng con rõ ràng, có chữ ạ rất lễ phép. Cô thưởng cho con năm sao! Con giỏi quá! Bây giờ con thử đọc câu tiếp theo nhé, cô tin con cũng giỏi như vậy!`;
-    detailHTML = `✅ <b>Con đúng hết:</b> ${correctWords.length}/${result.expected.length} chữ.<br>🎉 <b>Giữ vững nhé:</b> Con nhớ đọc luôn có chữ ạ cho lễ phép như hôm nay.<br>💡 <b>Thử thách thêm:</b> Con thử đọc câu này nhanh hơn một chút mà vẫn rõ nhé!`;
-    tip = "Con giỏi quá! Cô thưởng 5 sao! Con thử đọc với cảm xúc vui tươi hơn nhé!";
-  }
-  else if (score >= 80) {
-    feedbackTitle = "😊 Rất tốt - 4 sao!";
-    const missText = missingWords.length ? missingWords.join(", ") : "";
-    feedbackShort = `Con đọc rất tốt, đúng ${score}% rồi! Cô khen! ${missingWords.length ? `Chỉ thiếu một chút xíu: chữ ${missText}` : `Gần hoàn hảo rồi!`}`;
-    spokenFeedback = `Con đọc rất tốt! Cô khen con! Con đã đọc đúng được các chữ: ${correctWords.join(", ")}. ${missingWords.length ? `Con chỉ còn thiếu chữ ${missingWords.join(", ")} nữa thôi là được 5 sao rồi. Chữ ${missingWords[0]} con nhớ đọc rõ dấu nhé, đọc chậm lại một chút.` : `Giọng con rõ ràng lắm rồi!`} Con giỏi lắm, cố thêm một lần nữa là được 5 sao nhé!`;
-    detailHTML = `✅ <b>Đúng:</b> ${correctWords.join(", ")}<br>${missingWords.length ? `🟡 <b>Thiếu / chưa rõ:</b> ${missingWords.join(", ")} – Con đọc lại chữ này rõ hơn nhé.` : `🌟 <b>Gần hoàn hảo!</b> Có thể dấu thanh chưa khớp hẳn.`}<br>👉 <b>Cách sửa:</b> Nghe mẫu chậm chữ ${missingWords[0] || target.split(" ")[0]} rồi đọc lại cả câu: <b>${target}</b>`;
-    tip = `Con thiếu chữ ${missingWords.join(", ")} thôi. Nghe cô đọc chậm chữ đó nhé!`;
-  }
-  else if (score >= 60) {
-    feedbackTitle = "🌱 Khá lắm - 3 sao! Sắp được rồi!";
-    feedbackShort = `Con đọc được ${score}%, khá lắm! Cô thấy con đúng được: ${correctWords.join(", ")}. Còn thiếu: ${missingWords.join(", ")}.`;
-    spokenFeedback = `Con cố gắng rất tốt! Cô nghe con đọc được rồi: ${correctWords.slice(0,3).join(", ")} ${correctWords.length>3 ? "và các chữ khác" : ""}. Nhưng cô còn thiếu chưa nghe rõ các chữ: ${missingWords.join(", ")}. ${hasA && !spokenHasA ? "Đặc biệt con nhớ chữ ạ ở cuối câu cho lễ phép nhé, con quên chữ ạ rồi!" : ""} Bây giờ con nghe cô đọc mẫu chậm nhé, cô sẽ đọc từng cụm: ${target.split(".")[0].split(" ").slice(0,3).join(" ")}... rồi con đọc theo. Con làm được mà!`;
-    detailHTML = `✅ <b>Con làm được:</b> ${correctWords.join(", ")} – Cô khen!<br>🟠 <b>Cần sửa:</b> Thiếu chữ <b>${missingWords.join(", ")}</b>. ${hasA && !spokenHasA ? "<br>❗ <b>Lễ phép:</b> Câu này phải có chữ <b>ạ</b> ở cuối, con nhớ nhé!" : ""}<br>👉 <b>Cách luyện:</b> Đọc chia 2 phần: Phần 1: <b>${result.expected.slice(0,Math.ceil(result.expected.length/2)).join(" ")}</b> – Phần 2: <b>${result.expected.slice(Math.ceil(result.expected.length/2)).join(" ")}</b>`;
-    tip = `Chia câu làm đôi để dễ đọc hơn nhé con!`;
-  }
-  else if (score >= 35) {
-    feedbackTitle = "💪 Cố gắng - 2 sao! Mình luyện thêm nhé!";
-    feedbackShort = `Cô thấy con cố gắng rồi! Mới được ${score}%. Con đúng được chữ: ${correctWords.join(", ") || "chưa rõ lắm"}. Mình luyện lại chậm hơn nhé.`;
-    spokenFeedback = `Không sao đâu con yêu, mình cùng cố gắng nhé! Cô biết câu này hơi dài với con. Cô nghe con đọc được ${correctWords.length ? `chữ ${correctWords.join(", ")}` : "một chút"} rồi, giỏi lắm! Nhưng con đọc còn thiếu nhiều chữ quá: ${missingWords.slice(0,4).join(", ")} ${missingWords.length>4 ? "và các chữ khác" : ""}. Bây giờ cô đọc mẫu thật chậm, con chỉ cần đọc theo 2 chữ đầu thôi nhé: ${result.expected.slice(0,2).join(" ")}. Con đọc 2 chữ này rõ rồi mình đọc tiếp nhé!`;
-    detailHTML = `🔵 <b>Con đọc được:</b> ${correctWords.length ? correctWords.join(", ") : "Cố gắng rồi, nhưng cô chưa nghe rõ"}<br>🔴 <b>Chưa được:</b> ${missingWords.join(", ")}<br>👉 <b>Cách sửa từng bước:</b><br>1. Chỉ đọc: <b>${result.expected.slice(0,2).join(" ")}</b><br>2. Thêm: <b>${result.expected.slice(0,4).join(" ")}</b><br>3. Cả câu: <b>${target}</b>`;
-    tip = "Đừng đọc cả câu vội, con đọc 2 chữ đầu thật rõ trước nhé!";
-  }
-  else {
-    feedbackTitle = "🌈 Mới bắt đầu - Cô luôn bên con!";
-    feedbackShort = `Không sao đâu con yêu! Cô thấy con nói là "${trimmed}" nhưng bài là "${target}". Mình nghe mẫu và đọc lại nhé!`;
-    spokenFeedback = `Không sao đâu con yêu, cô luôn bên con mà! Cô nghe con nói là ${trimmed}, nhưng câu mẫu của mình là ${target}. Có thể con chưa nhớ câu hoặc micro nghe chưa rõ. Bây giờ con bấm nút nghe mẫu màu xanh, cô sẽ đọc thật chậm, thật rõ cho con nghe: ${target}. Sau đó con bấm micro và chỉ đọc 2 chữ đầu tiên thôi: ${result.expected.slice(0,2).join(" ")}. Con làm được, cô tin con!`;
-    detailHTML = `📝 <b>Bé nói:</b> "${trimmed}"<br>📖 <b>Bài đọc:</b> "${target}"<br>💡 <b>Có thể:</b> Con đọc chưa hết câu, hoặc nói quá nhanh, hoặc phòng ồn.<br>👉 <b>Cô giúp con:</b> Bấm <b>Nghe mẫu chậm</b> 3 lần, rồi chỉ đọc <b>${result.expected.slice(0,2).join(" ")}</b> thôi. Được 2 chữ rồi mình đọc thêm nhé!`;
-    tip = "Con bấm Nghe mẫu chậm 3 lần, rồi chỉ đọc 2 chữ đầu thôi nhé!";
+  if (!text) {
+    title = "👂 Cô chưa nghe rõ";
+    short = "Con đọc to hơn và thử lại nhé!";
+    voice = "Cô chưa nghe rõ. Con hãy đọc to và rõ hơn nhé!";
+    tip = "Kiểm tra micro và đọc lại câu mẫu.";
+    stars = "⭐";
+  } else if (score >= 95) {
+    title = "🌟 Xuất sắc!";
+    short = "Con đọc rất tốt. Cô khen con!";
+    voice = "Xuất sắc! Con đọc đúng hết rồi. Cô khen con!";
+    tip = "Con thử đọc tự nhiên và truyền cảm hơn nhé!";
+    stars = "⭐⭐⭐⭐⭐";
+  } else if (score >= 80) {
+    title = "😊 Rất tốt!";
+    short = "Con cần luyện: " + missing.join(", ");
+    voice = "Rất tốt! Con đọc lại từ " + missing.join(", ") + " nhé!";
+    tip = "Nghe mẫu và đọc lại những từ còn thiếu.";
+    stars = "⭐⭐⭐⭐";
+  } else if (score >= 60) {
+    title = "🌱 Khá lắm!";
+    short = "Đúng: " + (correct.join(", ") || "chưa rõ") +
+      ". Cần luyện: " + missing.join(", ");
+    voice = "Khá lắm! Con luyện thêm các từ " + missing.join(", ") + " nhé!";
+    tip = "Đọc từng cụm từ, sau đó đọc cả câu.";
+    stars = "⭐⭐⭐";
+  } else if (score >= 35) {
+    title = "💪 Cố gắng nhé!";
+    short = "Con cần luyện lại: " + missing.join(", ");
+    voice = "Không sao! Con nghe cô đọc mẫu rồi luyện từng từ nhé!";
+    tip = "Đọc hai từ đầu trước, rồi đọc tiếp.";
+    stars = "⭐⭐";
+  } else {
+    title = "❤️ Cùng luyện lại nhé!";
+    short = "Con hãy nghe mẫu và đọc lại câu nhé.";
+    voice = "Con nghe cô đọc mẫu nhé. Sau đó con đọc lại từng từ!";
+    tip = "Nghe mẫu chậm rồi đọc từng từ.";
+    stars = "⭐";
   }
 
-  lastFeedback = spokenFeedback;
+  lastFeedback = voice;
   lastSampleForReplay = target;
 
-  $("transcript").textContent = trimmed || "Chưa nhận dạng được lời đọc.";
+  $("transcript").textContent = text || "Chưa nhận dạng được lời đọc.";
   $("transcriptArea").classList.remove("hidden");
   $("resultBox").classList.remove("hidden");
+  $("resultTitle").textContent = title;
+  $("stars").textContent = stars;
+  $("feedbackText").textContent = short;
 
-  $("resultTitle").textContent = feedbackTitle;
-  $("stars").textContent =
-    score >= 95 ? "⭐⭐⭐⭐⭐" :
-    score >= 80 ? "⭐⭐⭐⭐" :
-    score >= 60 ? "⭐⭐⭐" :
-    score >= 35 ? "⭐⭐" : "⭐";
+  // Nội dung đưa vào innerHTML chỉ lấy từ dữ liệu câu/từ do người dùng nhập.
+  // Dùng textContent để tránh diễn giải nội dung người dùng thành HTML.
+  const detail = $("detailFeedback");
+  detail.innerHTML = "";
+  const line1 = document.createElement("div");
+  const strong1 = document.createElement("b");
+  strong1.textContent = "✅ Đọc đúng: ";
+  line1.append(strong1, document.createTextNode(correct.join(", ") || "Chưa xác định"));
+  const line2 = document.createElement("div");
+  const strong2 = document.createElement("b");
+  strong2.textContent = "📝 Cần luyện: ";
+  line2.append(strong2, document.createTextNode(missing.join(", ") || "Không có"));
+  const line3 = document.createElement("div");
+  const strong3 = document.createElement("b");
+  strong3.textContent = "💡 Cô hướng dẫn: ";
+  line3.append(strong3, document.createTextNode(tip));
+  detail.append(line1, line2, line3);
 
-  $("feedbackText").textContent = feedbackShort;
-  $("detailFeedback").innerHTML = detailHTML;
   $("scoreBar").style.width = score + "%";
-  $("scoreLabel").textContent = trimmed ? `Mức khớp: ${score}% - Đúng ${result.matches}/${result.expected.length} chữ` : "Chưa có kết quả để đối chiếu.";
+  $("scoreLabel").textContent =
+    `Mức khớp: ${score}% – Đúng ${result.matches}/${result.expected.length} từ`;
 
-  // Cập nhật bảng điểm ngắn gọn
   const badge = $("levelBadge");
-  const shortEl = $("shortScore");
-  if(score>=95){badge.textContent="95-100% - 5 SAO - XUẤT SẮC"; badge.style.background="#22c55e"; badge.style.color="white"; shortEl.textContent=`✅ ${result.matches}/${result.expected.length} chữ - Đúng hết! - Cô khen: Xuất sắc!`;}
-  else if(score>=80){badge.textContent=`${score}% - 4 SAO - RẤT TỐT`; badge.style.background="#0ea5e9"; badge.style.color="white"; shortEl.textContent=`🟢 ${result.matches}/${result.expected.length} chữ - Thiếu: ${missingWords.join(", ")||"rất ít"} - Cô khen: Rất tốt!`;}
-  else if(score>=60){badge.textContent=`${score}% - 3 SAO - KHÁ`; badge.style.background="#eab308"; badge.style.color="black"; shortEl.textContent=`🟡 ${result.matches}/${result.expected.length} chữ - Đúng: ${correctWords.join(", ")} - Cần: ${missingWords.join(", ")}`;}
-  else if(score>=35){badge.textContent=`${score}% - 2 SAO - CỐ GẮNG`; badge.style.background="#f97316"; badge.style.color="white"; shortEl.textContent=`🟠 ${result.matches}/${result.expected.length} chữ - Mới được: ${correctWords.join(", ")||"ít"} - Luyện: ${result.expected.slice(0,2).join(" ")}`;}
-  else {badge.textContent=`${score}% - 1 SAO - BẮT ĐẦU`; badge.style.background="#ef4444"; badge.style.color="white"; shortEl.textContent=`🔴 Bé nói "${trimmed}" - Bài: "${target}" - Nghe mẫu lại nhé!`; }
+  badge.textContent = `${score}% – ${title}`;
+  badge.style.background =
+    score >= 80 ? "#22c55e" :
+    score >= 60 ? "#eab308" :
+    score >= 35 ? "#f97316" : "#ef4444";
+  badge.style.color = score >= 60 ? "white" : "black";
 
-  $("teacherTip").innerHTML = `<b>${feedbackTitle}</b><br>${tip}`;
+  $("shortScore").textContent =
+    `${result.matches}/${result.expected.length} từ đúng. ` +
+    (missing.length ? "Cần luyện: " + missing.join(", ") : "Hoàn thành tốt!");
 
+  $("teacherTip").textContent = tip;
   $("wordComparison").innerHTML = "";
+
   result.comparison.forEach(item => {
     const span = document.createElement("span");
     span.className = "word" + (item.ok ? "" : " missed");
     span.textContent = (item.ok ? "✓ " : "✗ ") + item.word;
     $("wordComparison").appendChild(span);
   });
-  result.extra.forEach(item=>{
+
+  result.extra.forEach(item => {
     const span = document.createElement("span");
     span.className = "word extra";
     span.textContent = "+ " + item.word;
     $("wordComparison").appendChild(span);
   });
-  if (!trimmed) {
-    $("wordComparison").textContent = "Chưa có từ để đối chiếu.";
-  }
 
-  setStatus(
-    "micStatus",
-    score>=80 ? "Tuyệt vời! Cô đang khen con!" : "Cô đã nhận xét xong, con nghe cô nói nhé!",
-    score>=60 ? "success" : "error"
-  );
+  setStatus("micStatus", "Cô đã nhận xét xong. Con hãy nghe cô nhé!", "success");
 
-  // TỰ ĐỘNG ĐỌC LỜI NHẬN XÉT CHI TIẾT
   if ("speechSynthesis" in window && window.SpeechSynthesisUtterance) {
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(spokenFeedback);
+    const utterance = new SpeechSynthesisUtterance(voice);
     utterance.lang = "vi-VN";
-    utterance.rate = 0.82;
+    utterance.rate = 0.85;
+
     const selectedVoice = $("voiceSelect").value;
-    const selected = voices.find(voice => voice.voiceURI === selectedVoice);
+    const selected = voices.find(v => v.voiceURI === selectedVoice);
     if (selected) utterance.voice = selected;
+
     utterance.onend = () => {
-      if(score < 60){
-        // Tự động đọc lại mẫu chậm sau khi nhận xét xong để bé sửa
-        setTimeout(()=>{
-          setStatus("micStatus","Bây giờ cô đọc mẫu chậm để con sửa nhé!","success");
-          speak(target, 0.55);
-        }, 800);
+      if (score < 60 && text) {
+        setStatus("micStatus", "Cô đọc mẫu chậm để con luyện lại nhé!", "success");
+        speak(target, 0.55);
       } else {
-        setStatus("micStatus","Cô nhận xét xong rồi! Bé có thể luyện câu tiếp theo!", "success");
+        setStatus("micStatus", "Hoàn thành! Con tiếp tục luyện đọc nhé!", "success");
       }
     };
     utterance.onerror = () => {
-      setStatus("micStatus", "Nhận xét đã hiển thị. Nếu không nghe được, kiểm tra âm lượng.", "error");
+      setStatus("micStatus", "Nhận xét đã hiển thị. Hãy kiểm tra âm lượng nếu không nghe được.", "error");
     };
-    window.setTimeout(() => window.speechSynthesis.speak(utterance), 400);
+
+    window.speechSynthesis.speak(utterance);
   }
 }
 
 function startRecognition() {
-if (!SpeechRecognition) {
-setStatus("micStatus", "Trình duyệt không hỗ trợ nhận dạng giọng nói. Hãy thử Chrome trên máy tính hoặc Android. Bé vẫn có thể nghe mẫu và thu âm.", "error");
-return;
-}
-if (listening) {
-stopRecognitionIfNeeded();
-return;
-}
-if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-finalText = "";
-interimText = "";
-finalHandled = false;
-$("resultBox").classList.add("hidden");
-$("transcriptArea").classList.remove("hidden");
-$("transcript").textContent = "Đang chờ bé đọc...";
-$("micBtn").textContent = "⏹ Kết thúc lượt đọc";
-setStatus("micStatus", "Đang nghe bé đọc. Con hãy đọc hết câu rồi dừng lại một chút nhé.");
+  if (!SpeechRecognition) {
+    setStatus("micStatus", "Trình duyệt chưa hỗ trợ nhận dạng giọng nói. Hãy thử Chrome hoặc Edge; bé vẫn có thể nghe mẫu và thu âm.", "error");
+    return;
+  }
 
-try {
-recognition = new SpeechRecognition();
-recognition.lang = "vi-VN";
-recognition.continuous = false;
-recognition.interimResults = true;
-recognition.maxAlternatives = 1;
+  if (listening) {
+    try { recognition.stop(); } catch (error) { console.warn(error); }
+    return;
+  }
 
-recognition.onstart = () => {
-listening = true;
-setStatus("micStatus", "🎙 Micro đang nghe. Bé hãy đọc câu mẫu thật rõ.");
-};
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 
-recognition.onresult = event => {
-interimText = "";
-for (let i = event.resultIndex; i < event.results.length; i++) {
-const result = event.results[i];
-const transcript = result[0]?.transcript?.trim() || "";
-if (!transcript) continue;
-if (result.isFinal) finalText += (finalText ? " " : "") + transcript;
-else interimText += (interimText ? " " : "") + transcript;
-}
-$("transcript").textContent = (finalText + " " + interimText).trim() || "Đang nghe bé đọc...";
-};
+  finalText = "";
+  interimText = "";
+  finalHandled = false;
+  ignoreRecognitionEnd = false;
 
-recognition.onerror = event => {
-const messages = {
-"not-allowed": "Micro chưa được cấp quyền. Hãy cho phép trình duyệt sử dụng micro.",
-"service-not-allowed": "Dịch vụ nhận dạng giọng nói đang bị chặn.",
-"audio-capture": "Không tìm thấy micro. Hãy kiểm tra thiết bị.",
-"no-speech": "Chưa phát hiện giọng nói. Bé hãy thử lại nhé.",
-"network": "Không kết nối được dịch vụ nhận dạng. Hãy kiểm tra Internet.",
-"language-not-supported": "Thiết bị không hỗ trợ nhận dạng tiếng Việt.",
-"aborted": "Lượt nhận dạng đã được dừng."
-};
-setStatus("micStatus", messages[event.error] || "Không thể nhận dạng giọng nói. Hãy thử lại.", "error");
-};
+  $("resultBox").classList.add("hidden");
+  $("transcriptArea").classList.remove("hidden");
+  $("transcript").textContent = "Đang chờ bé đọc...";
+  $("micBtn").textContent = "⏹ Kết thúc lượt đọc";
+  setStatus("micStatus", "Đang khởi động micro...");
 
-recognition.onend = () => {
-listening = false;
-$("micBtn").textContent = "🎙 Bé đọc vào micro";
-if (finalHandled) return;
-finalHandled = true;
-evaluateSpeech(String(finalText || "").trim());
-};
+  try {
+    recognition = new SpeechRecognition();
+    recognition.lang = "vi-VN";
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
 
-recognition.start();
-} catch (error) {
-listening = false;
-$("micBtn").textContent = "🎙 Bé đọc vào micro";
-setStatus("micStatus", "Không thể khởi động micro. Hãy kiểm tra quyền micro và thử lại. " + (error.message || ""), "error");
-}
+    recognition.onstart = () => {
+      listening = true;
+      setStatus("micStatus", "🎙 Micro đang nghe. Bé hãy đọc câu mẫu thật rõ.");
+    };
+
+    recognition.onresult = event => {
+      interimText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const item = event.results[i];
+        const transcript = item[0]?.transcript?.trim() || "";
+        if (!transcript) continue;
+        if (item.isFinal) {
+          finalText += (finalText ? " " : "") + transcript;
+        } else {
+          interimText += (interimText ? " " : "") + transcript;
+        }
+      }
+      $("transcript").textContent =
+        (finalText + " " + interimText).trim() || "Đang nghe bé đọc...";
+    };
+
+    recognition.onerror = event => {
+      const messages = {
+        "not-allowed": "Micro chưa được cấp quyền. Hãy cho phép trình duyệt sử dụng micro.",
+        "service-not-allowed": "Dịch vụ nhận dạng giọng nói đang bị chặn.",
+        "audio-capture": "Không tìm thấy micro. Hãy kiểm tra thiết bị.",
+        "no-speech": "Chưa phát hiện giọng nói. Bé hãy thử lại nhé.",
+        "network": "Không kết nối được dịch vụ nhận dạng. Hãy kiểm tra Internet.",
+        "language-not-supported": "Thiết bị không hỗ trợ nhận dạng tiếng Việt.",
+        "aborted": "Lượt đọc đã được dừng."
+      };
+      setStatus("micStatus", messages[event.error] || "Không thể nhận dạng giọng nói. Hãy thử lại.", "error");
+    };
+
+    recognition.onend = () => {
+      listening = false;
+      $("micBtn").textContent = "🎙 Bé đọc vào micro";
+
+      if (ignoreRecognitionEnd) {
+        ignoreRecognitionEnd = false;
+        return;
+      }
+      if (finalHandled) return;
+      finalHandled = true;
+      evaluateSpeech(String(finalText || "").trim());
+    };
+
+    recognition.start();
+  } catch (error) {
+    listening = false;
+    $("micBtn").textContent = "🎙 Bé đọc vào micro";
+    setStatus("micStatus", "Không thể khởi động micro. Hãy kiểm tra quyền micro và thử lại.", "error");
+  }
 }
 
 async function startRecording() {
-if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
-setStatus("recordStatus", "Trình duyệt chưa hỗ trợ thu âm hoặc trang chưa mở qua HTTPS. Hãy thử Chrome trên điện thoại.", "error");
-return;
-}
-if (isRecording) return;
-try {
-mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-audioChunks = [];
-let options = {};
-if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) options.mimeType = "audio/webm;codecs=opus";
-else if (MediaRecorder.isTypeSupported("audio/mp4")) options.mimeType = "audio/mp4";
-mediaRecorder = new MediaRecorder(mediaStream, options);
-mediaRecorder.ondataavailable = event => {
-if (event.data && event.data.size) audioChunks.push(event.data);
-};
-mediaRecorder.onerror = () => setStatus("recordStatus", "Có lỗi khi thu âm. Hãy kiểm tra micro và thử lại.", "error");
-mediaRecorder.onstop = () => {
-isRecording = false;
-if (mediaStream) {
-mediaStream.getTracks().forEach(track => track.stop());
-mediaStream = null;
-}
-$("recordBtn").disabled = false;
-$("stopRecordBtn").disabled = true;
-if (!audioChunks.length) {
-setStatus("recordStatus", "Chưa thu được dữ liệu âm thanh. Hãy thử lại.", "error");
-return;
-}
-const type = mediaRecorder.mimeType || "audio/webm";
-const blob = new Blob(audioChunks, { type });
-if (audioUrl) URL.revokeObjectURL(audioUrl);
-audioUrl = URL.createObjectURL(blob);
-$("playback").src = audioUrl;
-$("audioArea").classList.remove("hidden");
-setStatus("recordStatus", "Đã thu âm xong! Bé có thể nghe lại hoặc tải bản ghi âm.", "success");
-};
-mediaRecorder.start();
-isRecording = true;
-$("recordBtn").disabled = true;
-$("stopRecordBtn").disabled = false;
-setStatus("recordStatus", "Đang thu âm. Hãy để bé đọc, sau đó nhấn Dừng thu âm.");
-} catch (error) {
-if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
-mediaStream = null;
-isRecording = false;
-$("recordBtn").disabled = false;
-$("stopRecordBtn").disabled = true;
-let message = "Không thể thu âm. Hãy kiểm tra quyền micro và thử lại.";
-if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") message = "Bạn chưa cấp quyền micro cho trang web.";
-else if (error.name === "NotFoundError") message = "Không tìm thấy micro trên thiết bị.";
-else if (error.name === "NotReadableError") message = "Micro đang được ứng dụng khác sử dụng.";
-setStatus("recordStatus", message, "error");
-}
+  if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+    setStatus("recordStatus", "Trình duyệt chưa hỗ trợ thu âm hoặc trang chưa mở qua HTTPS. Hãy thử Chrome trên điện thoại.", "error");
+    return;
+  }
+  if (isRecording) return;
+
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioChunks = [];
+
+    let options = {};
+    if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+      options.mimeType = "audio/webm;codecs=opus";
+    } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+      options.mimeType = "audio/mp4";
+    }
+
+    mediaRecorder = new MediaRecorder(mediaStream, options);
+    mediaRecorder.ondataavailable = event => {
+      if (event.data && event.data.size) audioChunks.push(event.data);
+    };
+    mediaRecorder.onerror = () => {
+      setStatus("recordStatus", "Có lỗi khi thu âm. Hãy kiểm tra micro và thử lại.", "error");
+    };
+    mediaRecorder.onstop = () => {
+      isRecording = false;
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream = null;
+      }
+      $("recordBtn").disabled = false;
+      $("stopRecordBtn").disabled = true;
+
+      if (!audioChunks.length) {
+        setStatus("recordStatus", "Chưa thu được dữ liệu âm thanh. Hãy thử lại.", "error");
+        return;
+      }
+
+      const type = mediaRecorder.mimeType || "audio/webm";
+      const blob = new Blob(audioChunks, { type });
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      audioUrl = URL.createObjectURL(blob);
+      $("playback").src = audioUrl;
+      $("audioArea").classList.remove("hidden");
+      setStatus("recordStatus", "Đã thu âm xong! Bé có thể nghe lại hoặc tải bản ghi âm.", "success");
+    };
+
+    mediaRecorder.start();
+    isRecording = true;
+    $("recordBtn").disabled = true;
+    $("stopRecordBtn").disabled = false;
+    setStatus("recordStatus", "Đang thu âm. Bé đọc xong thì nhấn Dừng thu âm.");
+  } catch (error) {
+    if (mediaStream) mediaStream.getTracks().forEach(track => track.stop());
+    mediaStream = null;
+    isRecording = false;
+    $("recordBtn").disabled = false;
+    $("stopRecordBtn").disabled = true;
+
+    let message = "Không thể thu âm. Hãy kiểm tra quyền micro và thử lại.";
+    if (error.name === "NotAllowedError" || error.name === "PermissionDeniedError") {
+      message = "Bạn chưa cấp quyền micro cho trang web.";
+    } else if (error.name === "NotFoundError") {
+      message = "Không tìm thấy micro trên thiết bị.";
+    } else if (error.name === "NotReadableError") {
+      message = "Micro đang được ứng dụng khác sử dụng.";
+    }
+    setStatus("recordStatus", message, "error");
+  }
 }
 
 function stopRecording() {
-if (mediaRecorder && isRecording) {
-try { mediaRecorder.stop(); } catch (error) { console.warn(error); }
-}
+  if (mediaRecorder && isRecording) {
+    try { mediaRecorder.stop(); } catch (error) { console.warn(error); }
+  }
 }
 
-function quickAdd(txt){
-$("customSentence").value = txt;
-$("addSentenceBtn").click();
+const mouthData = {
+  "a": ["mouth-a", "Mở miệng rộng, hạ hàm dưới."],
+  "ă": ["mouth-aw", "Mở miệng vừa, phát âm ngắn."],
+  "â": ["mouth-eh", "Miệng mở vừa, phát âm ngắn."],
+  "e": ["mouth-e", "Kéo môi ngang, mở miệng vừa."],
+  "ê": ["mouth-eh", "Môi hơi kéo ngang, miệng mở ít."],
+  "i": ["mouth-i", "Kéo nhẹ hai môi sang hai bên."],
+  "o": ["mouth-o", "Chúm tròn môi, mở miệng."],
+  "ô": ["mouth-oh", "Tròn môi, mở miệng nhỏ."],
+  "ơ": ["mouth-ow", "Môi thả lỏng, mở vừa."],
+  "u": ["mouth-u", "Chúm môi nhỏ, đưa môi ra trước."],
+  "ư": ["mouth-uw", "Môi hơi mở, không chúm tròn."]
+};
+let selectedMouth = "a";
+
+function updateMouth() {
+  const data = mouthData[selectedMouth];
+  $("mouthShape").className = "mouth-shape " + data[0];
+  $("mouthLetter").textContent = selectedMouth.toUpperCase();
+  $("mouthGuide").textContent = data[1];
+}
+
+function renderMouth() {
+  const buttons = $("mouthButtons");
+  buttons.innerHTML = "";
+
+  Object.keys(mouthData).forEach(vowel => {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = vowel.toUpperCase();
+    button.className = vowel === selectedMouth ? "active" : "";
+    button.addEventListener("click", () => {
+      selectedMouth = vowel;
+      updateMouth();
+      renderMouth();
+    });
+    buttons.appendChild(button);
+  });
+  updateMouth();
 }
 
 $("lessonSelect").addEventListener("change", event => {
-selectLesson(Number(event.target.value) || 0);
+  selectLesson(Number(event.target.value));
 });
 $("sampleBtn").addEventListener("click", () => sampleRead(Number($("speedSelect").value)));
 $("slowBtn").addEventListener("click", () => sampleRead(Math.min(0.55, Number($("speedSelect").value))));
 $("micBtn").addEventListener("click", startRecognition);
+$("mouthSpeakBtn").addEventListener("click", () => speak(selectedMouth, 0.65));
+
 $("speakFeedbackBtn").addEventListener("click", () => {
-if (lastFeedback) speak(lastFeedback, 0.82);
-else setStatus("micStatus", "Bé hãy đọc một câu trước để nhận lời động viên.", "error");
+  if (lastFeedback) speak(lastFeedback, 0.85);
+  else setStatus("micStatus", "Bé hãy đọc một câu trước để nhận lời động viên.", "error");
 });
-$("replaySampleBtn").addEventListener("click", ()=>{
-if(lastSampleForReplay) speak(lastSampleForReplay, 0.55);
+
+$("replaySampleBtn").addEventListener("click", () => {
+  if (lastSampleForReplay) speak(lastSampleForReplay, 0.55);
 });
+
 $("addSentenceBtn").addEventListener("click", () => {
-const sentence = $("customSentence").value.trim();
-if (!sentence) {
-$("customSentence").focus();
-return;
-}
-if (lessons.length >= 100) {
-alert("Danh sách đã có tối đa 100 câu trong phiên này.");
-return;
-}
-let s = sentence.normalize('NFC');
-if(!/[.!?ạ]$/.test(s)) s+='.';
-lessons.push(s);
-currentIndex = lessons.length - 1;
-renderLesson();
-setStatus("micStatus", `Đã thêm: "${s}" - Bé học ngay nhé!`, "success");
-speak(s, 0.75);
-$("customSentence").value = "";
+  const sentence = $("customSentence").value.trim();
+  if (!sentence) {
+    $("customSentence").focus();
+    return;
+  }
+  if (lessons.length >= 100) {
+    alert("Danh sách đã có tối đa 100 câu trong phiên này.");
+    return;
+  }
+
+  let cleanSentence = sentence.normalize("NFC");
+  if (!/[.!?]$/.test(cleanSentence)) cleanSentence += ".";
+
+  lessons.push(cleanSentence);
+  currentIndex = lessons.length - 1;
+  renderLesson();
+  setStatus("micStatus", "Đã thêm câu mới. Bé nghe mẫu và luyện đọc nhé!", "success");
+  speak(cleanSentence, 0.75);
+  $("customSentence").value = "";
 });
+
+document.querySelectorAll("[data-quick]").forEach(button => {
+  button.addEventListener("click", () => {
+    $("customSentence").value = button.dataset.quick;
+    $("addSentenceBtn").click();
+  });
+});
+
 $("recordBtn").addEventListener("click", startRecording);
 $("stopRecordBtn").addEventListener("click", stopRecording);
+
 $("downloadBtn").addEventListener("click", () => {
-if (!audioUrl) return;
-const extension = mediaRecorder?.mimeType?.includes("mp4") ? "mp4" : "webm";
-const link = document.createElement("a");
-link.href = audioUrl;
-link.download = "be-luyen-doc." + extension;
-document.body.appendChild(link);
-link.click();
-link.remove();
+  if (!audioUrl) return;
+  const mime = mediaRecorder?.mimeType || "";
+  const extension = mime.includes("mp4") ? "mp4" : "webm";
+  const link = document.createElement("a");
+  link.href = audioUrl;
+  link.download = "be-luyen-doc." + extension;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 });
 
 if ("speechSynthesis" in window) {
-loadVoices();
-window.speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
 }
+
+renderMouth();
 renderLesson();
+
 if (!SpeechRecognition) {
-setStatus("micStatus", "Trình duyệt này không hỗ trợ nhận dạng giọng nói. Bạn vẫn có thể nghe mẫu và thu âm nếu thiết bị hỗ trợ.", "error");
+  setStatus("micStatus", "Trình duyệt này chưa hỗ trợ nhận dạng giọng nói. Bé vẫn có thể nghe mẫu và thu âm nếu thiết bị hỗ trợ.", "error");
 }
-window.quickAdd = quickAdd;
 })();
 </script>
 </body>
-</html>
+</html>'''
+
+path = Path("/mnt/data/index.html")
+path.write_text(html, encoding="utf-8")
+print(f"Đã tạo tệp hoàn chỉnh: {path} ({len(html):,} ký tự)")
